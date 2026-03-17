@@ -1,0 +1,9 @@
+{
+  "name": "emitkey — ETH Paper Wallet Generator",
+  "short_name": "emitkey",
+  "description": "Generate secure Ethereum paper wallets in your browser",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#09090b",
+  "theme_color": "#34d399"
+}

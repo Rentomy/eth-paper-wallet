@@ -14,19 +14,45 @@ const jetbrainsMono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "ETH Paper Wallet Generator",
-  description:
-    "Client-side Ethereum paper wallet generator. All generation happens locally in your browser — your private key never leaves your device. No server, no tracking.",
-  keywords: ["ethereum", "paper wallet", "ETH", "crypto", "offline", "open source"],
+  metadataBase: new URL("https://emitkey.app"),
+  title: "ETH Paper Wallet Generator — emitkey.app",
+  description: "Generate a secure Ethereum paper wallet 100% in your browser. No server, no tracking, no data transmission. Your private key never leaves your device.",
+  keywords: [
+    "ethereum paper wallet",
+    "ETH paper wallet generator",
+    "ethereum wallet offline",
+    "cold storage ethereum",
+    "crypto paper wallet",
+    "ethereum private key generator",
+    "offline eth wallet",
+    "secure ethereum wallet"
+  ],
+  authors: [{ name: "emitkey", url: "https://emitkey.app" }],
   icons: {
     icon: "/icon.png",
     shortcut: "/favicon.ico",
     apple: "/apple-touch-icon.png",
   },
   openGraph: {
-    title: "ETH Paper Wallet Generator",
-    description: "Generate Ethereum paper wallets securely in your browser. Open source, no server, no tracking.",
+    title: "ETH Paper Wallet Generator — emitkey.app",
+    description: "Generate a secure Ethereum paper wallet entirely in your browser. Open source, auditable, no server.",
+    url: "https://emitkey.app",
+    siteName: "emitkey",
+    locale: "en_US",
     type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "ETH Paper Wallet Generator — emitkey.app",
+    description: "100% client-side ETH paper wallet generator. No server, no tracking. Open source.",
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: { index: true, follow: true },
+  },
+  alternates: {
+    canonical: "https://emitkey.app",
   },
 };
 
@@ -43,6 +69,9 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" className={`${inter.variable} ${jetbrainsMono.variable}`}>
+      <head>
+        <link rel="manifest" href="/site.webmanifest" />
+      </head>
       <body className="font-sans antialiased">
         <ErrorBoundary>{children}</ErrorBoundary>
       </body>

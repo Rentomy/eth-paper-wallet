@@ -18,7 +18,7 @@ export default function Home() {
             Ethereum Paper Wallet
           </div>
           <h1 className="text-3xl font-bold text-foreground text-balance leading-tight mb-3">
-            Generate a Secure ETH Paper Wallet
+            Ethereum Paper Wallet Generator
           </h1>
           <p className="text-sm text-muted-foreground leading-relaxed text-pretty">
             100% client-side. Nothing is transmitted or stored. Your keys are
