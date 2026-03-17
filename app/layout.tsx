@@ -18,6 +18,11 @@ export const metadata: Metadata = {
   description:
     "Client-side Ethereum paper wallet generator. All generation happens locally in your browser — your private key never leaves your device. No server, no tracking.",
   keywords: ["ethereum", "paper wallet", "ETH", "crypto", "offline", "open source"],
+  icons: {
+    icon: "/icon.png",
+    shortcut: "/favicon.ico",
+    apple: "/apple-touch-icon.png",
+  },
   openGraph: {
     title: "ETH Paper Wallet Generator",
     description: "Generate Ethereum paper wallets securely in your browser. Open source, no server, no tracking.",
