@@ -1,5 +1,11 @@
-import WalletGenerator from "@/components/wallet-generator";
+import dynamic from "next/dynamic";
 import Footer from "@/components/footer";
+
+// Dynamically import client component with no SSR to avoid hydration issues
+const WalletGenerator = dynamic(
+  () => import("@/components/wallet-generator"),
+  { ssr: false }
+);
 
 export default function Home() {
   return (
