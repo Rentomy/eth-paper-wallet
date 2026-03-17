@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useCallback } from "react";
+import { useState, useCallback } from "react";
 import { ethers } from "ethers";
 import QRCode from "qrcode";
 
@@ -15,7 +15,6 @@ export default function WalletGenerator() {
   const [wallet, setWallet] = useState<WalletData | null>(null);
   const [generating, setGenerating] = useState(false);
   const [showPrivateKey, setShowPrivateKey] = useState(false);
-  const printRef = useRef<HTMLDivElement>(null);
 
   const generate = useCallback(async () => {
     setGenerating(true);
@@ -47,11 +46,16 @@ export default function WalletGenerator() {
     }
   }, []);
 
-  const handlePrint = () => {
-    if (!printRef.current) return;
-    const printContents = printRef.current.innerHTML;
+  const handlePrint = async () => {
+    if (!wallet) return;
+
+    // Generate fresh QR codes as base64 PNG data URLs
+    const qrAddress = await QRCode.toDataURL(wallet.address, { width: 160, margin: 1 });
+    const qrPrivKey = await QRCode.toDataURL(wallet.privateKey, { width: 160, margin: 1 });
+
     const printWindow = window.open("", "_blank");
     if (!printWindow) return;
+
     printWindow.document.write(`
       <!DOCTYPE html>
       <html>
@@ -65,7 +69,7 @@ export default function WalletGenerator() {
             .value { font-size: 12px; word-break: break-all; background: #f5f5f5; padding: 8px; border-radius: 4px; }
             .qr-pair { display: flex; gap: 32px; justify-content: center; margin-top: 16px; }
             .qr-box { text-align: center; }
-            .qr-box img { width: 160px; height: 160px; }
+            .qr-box img { width: 140px; height: 140px; }
             .qr-label { font-size: 11px; margin-top: 6px; color: #333; }
             h2 { font-size: 18px; margin-bottom: 24px; text-align: center; }
             .warning { font-size: 11px; color: #c00; border: 1px solid #c00; padding: 8px; border-radius: 4px; text-align: center; margin-bottom: 24px; }
@@ -73,7 +77,26 @@ export default function WalletGenerator() {
         </head>
         <body>
           <div class="wallet-print">
-            ${printContents}
+            <h2>Ethereum Paper Wallet</h2>
+            <p class="warning">Keep this document secure. Never share your private key.</p>
+            <div class="section">
+              <div class="label">Public Address</div>
+              <div class="value">${wallet.address}</div>
+            </div>
+            <div class="section">
+              <div class="label">Private Key</div>
+              <div class="value">${wallet.privateKey}</div>
+            </div>
+            <div class="qr-pair">
+              <div class="qr-box">
+                <img src="${qrAddress}" width="140" height="140" alt="Address QR" />
+                <div class="qr-label">Public Address</div>
+              </div>
+              <div class="qr-box">
+                <img src="${qrPrivKey}" width="140" height="140" alt="Private Key QR" />
+                <div class="qr-label">Private Key</div>
+              </div>
+            </div>
           </div>
         </body>
       </html>
@@ -141,34 +164,6 @@ export default function WalletGenerator() {
           <div className="grid grid-cols-2 gap-4 mt-2">
             <QRPanel label="Address QR" src={wallet.addressQR} />
             <QRPanel label="Private Key QR" src={wallet.privateKeyQR} blurred={!showPrivateKey} onReveal={() => setShowPrivateKey(true)} />
-          </div>
-
-          {/* Print area (hidden, used for printing) */}
-          <div className="hidden">
-            <div ref={printRef}>
-              <h2>Ethereum Paper Wallet</h2>
-              <p className="warning">Keep this document secure. Never share your private key.</p>
-              <div className="section">
-                <div className="label">Public Address</div>
-                <div className="value">{wallet.address}</div>
-              </div>
-              <div className="section">
-                <div className="label">Private Key</div>
-                <div className="value">{wallet.privateKey}</div>
-              </div>
-              <div className="qr-pair">
-                <div className="qr-box">
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src={wallet.addressQR} alt="Address QR code" />
-                  <div className="qr-label">Public Address</div>
-                </div>
-                <div className="qr-box">
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src={wallet.privateKeyQR} alt="Private key QR code" />
-                  <div className="qr-label">Private Key</div>
-                </div>
-              </div>
-            </div>
           </div>
 
           {/* Actions */}
