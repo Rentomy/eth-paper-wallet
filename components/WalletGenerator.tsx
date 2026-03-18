@@ -215,7 +215,7 @@ function SecurityTip() {
         <span className="text-emerald-400 font-semibold text-sm">Security Tip</span>
       </div>
       <p className="text-emerald-300/70 text-xs leading-relaxed">
-        Before storing large amounts — test your wallet first. Send a small amount (e.g. 0.001 ETH) to your new address, then import the private key into MetaMask or MyEtherWallet and verify you can access and send those funds. Only then use it for cold storage.
+        Before storing large amounts — test your wallet first. Send a small amount (e.g. 0.001 ETH) to your new address, then import the private key into MetaMask or Trust Wallet and verify you can access and send those funds. Only then use it for cold storage.
       </p>
     </div>
   );
