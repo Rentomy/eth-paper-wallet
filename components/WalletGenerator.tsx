@@ -2,17 +2,11 @@
 
 import { useState, useCallback } from "react";
 import { ethers } from "ethers";
-import QRCode from "qrcode";
-
-interface WalletData {
-  address: string;
-  privateKey: string;
-  addressQR: string;
-  privateKeyQR: string;
-}
+import { generateQR, copyToClipboard } from "@/lib/utils";
+import type { Wallet } from "@/types/wallet";
 
 export default function WalletGenerator() {
-  const [wallet, setWallet] = useState<WalletData | null>(null);
+  const [wallet, setWallet] = useState<Wallet | null>(null);
   const [generating, setGenerating] = useState(false);
   const [showPrivateKey, setShowPrivateKey] = useState(false);
 
@@ -21,25 +15,15 @@ export default function WalletGenerator() {
     setShowPrivateKey(false);
     try {
       const w = ethers.Wallet.createRandom();
-      const [addressQR, privateKeyQR] = await Promise.all([
-        QRCode.toDataURL(w.address, {
-          errorCorrectionLevel: "H",
-          margin: 1,
-          color: { dark: "#000000", light: "#ffffff" },
-          width: 200,
-        }),
-        QRCode.toDataURL(w.privateKey, {
-          errorCorrectionLevel: "H",
-          margin: 1,
-          color: { dark: "#000000", light: "#ffffff" },
-          width: 200,
-        }),
+      const [qrAddress, qrPrivateKey] = await Promise.all([
+        generateQR(w.address),
+        generateQR(w.privateKey),
       ]);
       setWallet({
         address: w.address,
         privateKey: w.privateKey,
-        addressQR,
-        privateKeyQR,
+        qrAddress,
+        qrPrivateKey,
       });
     } finally {
       setGenerating(false);
@@ -85,11 +69,11 @@ export default function WalletGenerator() {
             </div>
             <div class="qr-pair">
               <div class="qr-box">
-                <img src="${wallet.addressQR}" width="140" height="140" alt="Address QR" />
+                <img src="${wallet.qrAddress}" width="140" height="140" alt="Address QR" />
                 <div class="qr-label">Public Address</div>
               </div>
               <div class="qr-box">
-                <img src="${wallet.privateKeyQR}" width="140" height="140" alt="Private Key QR" />
+                <img src="${wallet.qrPrivateKey}" width="140" height="140" alt="Private Key QR" />
                 <div class="qr-label">Private Key</div>
               </div>
             </div>
@@ -170,8 +154,13 @@ export default function WalletGenerator() {
 
           {/* QR codes */}
           <div className="flex flex-col sm:flex-row gap-4 mt-2">
-            <QRPanel label="Address QR" src={wallet.addressQR} />
-            <QRPanel label="Private Key QR" src={wallet.privateKeyQR} blurred={!showPrivateKey} onReveal={() => setShowPrivateKey(true)} />
+            <QRPanel label="Address QR" src={wallet.qrAddress} />
+            <QRPanel
+              label="Private Key QR"
+              src={wallet.qrPrivateKey}
+              blurred={!showPrivateKey}
+              onReveal={() => setShowPrivateKey(true)}
+            />
           </div>
 
           {/* Actions */}
@@ -190,14 +179,16 @@ export default function WalletGenerator() {
   );
 }
 
-/* ── Small sub-components ────────────��─────────────────────────── */
+/* ── Small sub-components ─────────────────────────────────────── */
 
 function CopyButton({ value }: { value: string }) {
   const [copied, setCopied] = useState(false);
   const handleCopy = async () => {
-    await navigator.clipboard.writeText(value);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 1500);
+    const ok = await copyToClipboard(value);
+    if (ok) {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 1500);
+    }
   };
   return (
     <button
@@ -246,7 +237,7 @@ function QRPanel({
   );
 }
 
-/* ── Icons ─────────────────────────────────────────────────────── */
+/* ── Icons ────────────────────────────────────────────────────── */
 function EyeIcon() {
   return (
     <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24" aria-hidden="true">

@@ -1,9 +1,9 @@
 import dynamic from "next/dynamic";
-import Footer from "@/components/footer";
+import Footer from "@/components/Footer";
 
 // Dynamically import client component to avoid hydration issues
 const WalletGenerator = dynamic(
-  () => import("@/components/wallet-generator")
+  () => import("@/components/WalletGenerator")
 );
 
 export default function Home() {
