@@ -480,7 +480,7 @@ function SecurityTip() {
         <span className="text-emerald-400 font-semibold text-sm">Verify Wallet Before Use</span>
       </div>
       <p className="text-emerald-300/70 text-xs leading-relaxed">
-        Always verify your new paper wallet before using it — this step is absolutely essential! Never send funds to a newly generated wallet without testing it first. A single mistake (wrong key, typo, software error) means the permanent, irreversible loss of your funds — no support, no recovery.
+        Never fund a new paper wallet without testing it first. Any error will result in the permanent loss of your assets.
       </p>
       <p className="text-emerald-300/70 text-xs leading-relaxed">
         Import the private key into MetaMask or Trust Wallet and verify that the key matches the public key. Then send a small amount (e.g. 0.001 ETH) to your new address and test whether you can access and send this balance. Only then should you use the wallet for cold storage.
