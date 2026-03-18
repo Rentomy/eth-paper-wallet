@@ -5,6 +5,32 @@ import { ethers } from "ethers";
 import { generateQR, copyToClipboard } from "@/lib/utils";
 import type { Wallet } from "@/types/wallet";
 
+// Worker code defined outside component to prevent recreation on each render
+// Worker sends batches of 100 keys every 50ms without checking prefix
+// Main thread checks each key and derives address only on match
+const WORKER_CODE = `
+  self.onmessage = function(e) {
+    const prefix = e.data.prefix.toLowerCase();
+    let attempts = 0;
+    let running = true;
+
+    self.onmessage = function() { running = false; };
+
+    function batch() {
+      if (!running) return;
+      const keys = [];
+      for (let i = 0; i < 100; i++) {
+        const bytes = crypto.getRandomValues(new Uint8Array(32));
+        keys.push('0x' + Array.from(bytes).map(b => b.toString(16).padStart(2,'0')).join(''));
+        attempts++;
+      }
+      self.postMessage({ type: 'batch', keys, attempts });
+      setTimeout(batch, 50);
+    }
+    batch();
+  };
+`;
+
 export interface VanityGeneratorHandle {
   reset: () => void;
 }
@@ -18,40 +44,20 @@ const VanityGenerator = forwardRef<VanityGeneratorHandle>(function VanityGenerat
   const [showPrivateKey, setShowPrivateKey] = useState(false);
   const workerRef = useRef<Worker | null>(null);
   const workerUrlRef = useRef<string | null>(null);
+  const prefixRef = useRef(prefix);
   const [error, setError] = useState("");
 
-  // Inline Web Worker code (defined early so reset() can reference it)
-  // Worker sends batches of 100 keys every 50ms without checking prefix
-  // Main thread checks each key and derives address only on match
-  const workerCode = `
-    self.onmessage = function(e) {
-      const prefix = e.data.prefix.toLowerCase();
-      let attempts = 0;
-      let running = true;
-
-      self.onmessage = function() { running = false; };
-
-      function batch() {
-        if (!running) return;
-        const keys = [];
-        for (let i = 0; i < 100; i++) {
-          const bytes = crypto.getRandomValues(new Uint8Array(32));
-          keys.push('0x' + Array.from(bytes).map(b => b.toString(16).padStart(2,'0')).join(''));
-          attempts++;
-        }
-        self.postMessage({ type: 'batch', keys, attempts });
-        setTimeout(batch, 50);
-      }
-      batch();
-    };
-  `;
+  // Keep prefixRef in sync with prefix state
+  useEffect(() => {
+    prefixRef.current = prefix;
+  }, [prefix]);
 
   useImperativeHandle(ref, () => ({
     reset() {
       // Stop any running worker
       if (searching && workerRef.current) {
         workerRef.current.terminate();
-        const blob = new Blob([workerCode], { type: "application/javascript" });
+        const blob = new Blob([WORKER_CODE], { type: "application/javascript" });
         const workerUrl = URL.createObjectURL(blob);
         workerUrlRef.current = workerUrl;
         const worker = new Worker(workerUrl);
@@ -59,9 +65,11 @@ const VanityGenerator = forwardRef<VanityGeneratorHandle>(function VanityGenerat
         worker.onmessage = async (e) => {
           if (e.data.type === 'batch') {
             setAttemptCount(e.data.attempts);
+            const currentPrefix = prefixRef.current;
+            if (!currentPrefix) return;
             for (const privateKey of e.data.keys) {
               const w = new ethers.Wallet(privateKey);
-              if (w.address.toLowerCase().startsWith('0x' + prefix.toLowerCase())) {
+              if (w.address.toLowerCase().startsWith('0x' + currentPrefix.toLowerCase())) {
                 if (workerRef.current) {
                   workerRef.current.terminate();
                 }
@@ -85,6 +93,7 @@ const VanityGenerator = forwardRef<VanityGeneratorHandle>(function VanityGenerat
       setAttemptCount(0);
       setFoundWallet(null);
       setPrefix("");
+      prefixRef.current = "";
       setError("");
       setShowPrivateKey(false);
       setIsOpen(false);
@@ -94,7 +103,7 @@ const VanityGenerator = forwardRef<VanityGeneratorHandle>(function VanityGenerat
   // Initialize worker on mount
   useEffect(() => {
     if (typeof window !== "undefined") {
-      const blob = new Blob([workerCode], { type: "application/javascript" });
+      const blob = new Blob([WORKER_CODE], { type: "application/javascript" });
       const workerUrl = URL.createObjectURL(blob);
       workerUrlRef.current = workerUrl;
 
@@ -104,9 +113,11 @@ const VanityGenerator = forwardRef<VanityGeneratorHandle>(function VanityGenerat
       worker.onmessage = async (e) => {
         if (e.data.type === 'batch') {
           setAttemptCount(e.data.attempts);
+          const currentPrefix = prefixRef.current;
+          if (!currentPrefix) return;
           for (const privateKey of e.data.keys) {
             const w = new ethers.Wallet(privateKey);
-            if (w.address.toLowerCase().startsWith('0x' + prefix.toLowerCase())) {
+            if (w.address.toLowerCase().startsWith('0x' + currentPrefix.toLowerCase())) {
               if (workerRef.current) {
                 workerRef.current.terminate();
               }
@@ -137,6 +148,7 @@ const VanityGenerator = forwardRef<VanityGeneratorHandle>(function VanityGenerat
         workerUrlRef.current = null;
       }
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const handlePrefixChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -170,7 +182,7 @@ const VanityGenerator = forwardRef<VanityGeneratorHandle>(function VanityGenerat
       workerRef.current.terminate();
 
       // Recreate worker for future searches
-      const blob = new Blob([workerCode], { type: "application/javascript" });
+      const blob = new Blob([WORKER_CODE], { type: "application/javascript" });
       const workerUrl = URL.createObjectURL(blob);
       workerUrlRef.current = workerUrl;
 
@@ -180,9 +192,11 @@ const VanityGenerator = forwardRef<VanityGeneratorHandle>(function VanityGenerat
       worker.onmessage = async (e) => {
         if (e.data.type === 'batch') {
           setAttemptCount(e.data.attempts);
+          const currentPrefix = prefixRef.current;
+          if (!currentPrefix) return;
           for (const privateKey of e.data.keys) {
             const w = new ethers.Wallet(privateKey);
-            if (w.address.toLowerCase().startsWith('0x' + prefix.toLowerCase())) {
+            if (w.address.toLowerCase().startsWith('0x' + currentPrefix.toLowerCase())) {
               if (workerRef.current) {
                 workerRef.current.terminate();
               }
