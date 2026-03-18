@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useEffect, forwardRef, useImperativeHandle } from "react";
+import { useState, useRef, useEffect, forwardRef, useImperativeHandle, useCallback } from "react";
 import { ethers } from "ethers";
 import { generateQR, copyToClipboard } from "@/lib/utils";
 import type { Wallet } from "@/types/wallet";
@@ -45,49 +45,65 @@ const VanityGenerator = forwardRef<VanityGeneratorHandle>(function VanityGenerat
   const workerRef = useRef<Worker | null>(null);
   const workerUrlRef = useRef<string | null>(null);
   const prefixRef = useRef(prefix);
+  const searchingRef = useRef(searching);
   const [error, setError] = useState("");
 
-  // Keep prefixRef in sync with prefix state
+  // Keep refs in sync with state
   useEffect(() => {
     prefixRef.current = prefix;
   }, [prefix]);
 
+  useEffect(() => {
+    searchingRef.current = searching;
+  }, [searching]);
+
+  // Create worker message handler
+  const createWorkerMessageHandler = useCallback(() => {
+    return async (e: MessageEvent) => {
+      if (e.data.type === 'batch') {
+        setAttemptCount(e.data.attempts);
+        const currentPrefix = prefixRef.current;
+        if (!currentPrefix) return;
+        for (const privateKey of e.data.keys) {
+          const w = new ethers.Wallet(privateKey);
+          if (w.address.toLowerCase().startsWith('0x' + currentPrefix.toLowerCase())) {
+            if (workerRef.current) {
+              workerRef.current.terminate();
+            }
+            try {
+              const qrAddress = await generateQR(w.address);
+              const qrPrivateKey = await generateQR(w.privateKey);
+              setFoundWallet({ address: w.address, privateKey: w.privateKey, qrAddress, qrPrivateKey });
+              setSearching(false);
+              setAttemptCount(0);
+            } catch {
+              setError("Failed to generate QR codes");
+              setSearching(false);
+            }
+            return;
+          }
+        }
+      }
+    };
+  }, []);
+
+  // Create a new worker instance
+  const createWorker = useCallback(() => {
+    const blob = new Blob([WORKER_CODE], { type: "application/javascript" });
+    const workerUrl = URL.createObjectURL(blob);
+    workerUrlRef.current = workerUrl;
+    const worker = new Worker(workerUrl);
+    workerRef.current = worker;
+    worker.onmessage = createWorkerMessageHandler();
+    return worker;
+  }, [createWorkerMessageHandler]);
+
   useImperativeHandle(ref, () => ({
     reset() {
       // Stop any running worker
-      if (searching && workerRef.current) {
+      if (searchingRef.current && workerRef.current) {
         workerRef.current.terminate();
-        const blob = new Blob([WORKER_CODE], { type: "application/javascript" });
-        const workerUrl = URL.createObjectURL(blob);
-        workerUrlRef.current = workerUrl;
-        const worker = new Worker(workerUrl);
-        workerRef.current = worker;
-        worker.onmessage = async (e) => {
-          if (e.data.type === 'batch') {
-            setAttemptCount(e.data.attempts);
-            const currentPrefix = prefixRef.current;
-            if (!currentPrefix) return;
-            for (const privateKey of e.data.keys) {
-              const w = new ethers.Wallet(privateKey);
-              if (w.address.toLowerCase().startsWith('0x' + currentPrefix.toLowerCase())) {
-                if (workerRef.current) {
-                  workerRef.current.terminate();
-                }
-                try {
-                  const qrAddress = await generateQR(w.address);
-                  const qrPrivateKey = await generateQR(w.privateKey);
-                  setFoundWallet({ address: w.address, privateKey: w.privateKey, qrAddress, qrPrivateKey });
-                  setSearching(false);
-                  setAttemptCount(0);
-                } catch (err) {
-                  setError("Failed to generate QR codes");
-                  setSearching(false);
-                }
-                return;
-              }
-            }
-          }
-        };
+        createWorker();
       }
       setSearching(false);
       setAttemptCount(0);
@@ -98,44 +114,12 @@ const VanityGenerator = forwardRef<VanityGeneratorHandle>(function VanityGenerat
       setShowPrivateKey(false);
       setIsOpen(false);
     },
-  }), [searching]);
+  }), [createWorker]);
 
   // Initialize worker on mount
   useEffect(() => {
     if (typeof window !== "undefined") {
-      const blob = new Blob([WORKER_CODE], { type: "application/javascript" });
-      const workerUrl = URL.createObjectURL(blob);
-      workerUrlRef.current = workerUrl;
-
-      const worker = new Worker(workerUrl);
-      workerRef.current = worker;
-
-      worker.onmessage = async (e) => {
-        if (e.data.type === 'batch') {
-          setAttemptCount(e.data.attempts);
-          const currentPrefix = prefixRef.current;
-          if (!currentPrefix) return;
-          for (const privateKey of e.data.keys) {
-            const w = new ethers.Wallet(privateKey);
-            if (w.address.toLowerCase().startsWith('0x' + currentPrefix.toLowerCase())) {
-              if (workerRef.current) {
-                workerRef.current.terminate();
-              }
-              try {
-                const qrAddress = await generateQR(w.address);
-                const qrPrivateKey = await generateQR(w.privateKey);
-                setFoundWallet({ address: w.address, privateKey: w.privateKey, qrAddress, qrPrivateKey });
-                setSearching(false);
-                setAttemptCount(0);
-              } catch (err) {
-                setError("Failed to generate QR codes");
-                setSearching(false);
-              }
-              return;
-            }
-          }
-        }
-      };
+      createWorker();
     }
 
     return () => {
@@ -148,8 +132,7 @@ const VanityGenerator = forwardRef<VanityGeneratorHandle>(function VanityGenerat
         workerUrlRef.current = null;
       }
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [createWorker]);
 
   const handlePrefixChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value.toLowerCase();
@@ -180,41 +163,8 @@ const VanityGenerator = forwardRef<VanityGeneratorHandle>(function VanityGenerat
   const handleStopSearch = () => {
     if (workerRef.current) {
       workerRef.current.terminate();
-
       // Recreate worker for future searches
-      const blob = new Blob([WORKER_CODE], { type: "application/javascript" });
-      const workerUrl = URL.createObjectURL(blob);
-      workerUrlRef.current = workerUrl;
-
-      const worker = new Worker(workerUrl);
-      workerRef.current = worker;
-
-      worker.onmessage = async (e) => {
-        if (e.data.type === 'batch') {
-          setAttemptCount(e.data.attempts);
-          const currentPrefix = prefixRef.current;
-          if (!currentPrefix) return;
-          for (const privateKey of e.data.keys) {
-            const w = new ethers.Wallet(privateKey);
-            if (w.address.toLowerCase().startsWith('0x' + currentPrefix.toLowerCase())) {
-              if (workerRef.current) {
-                workerRef.current.terminate();
-              }
-              try {
-                const qrAddress = await generateQR(w.address);
-                const qrPrivateKey = await generateQR(w.privateKey);
-                setFoundWallet({ address: w.address, privateKey: w.privateKey, qrAddress, qrPrivateKey });
-                setSearching(false);
-                setAttemptCount(0);
-              } catch (err) {
-                setError("Failed to generate QR codes");
-                setSearching(false);
-              }
-              return;
-            }
-          }
-        }
-      };
+      createWorker();
     }
     setSearching(false);
     setAttemptCount(0);
@@ -522,7 +472,10 @@ function SecurityTip() {
         <span className="text-emerald-400 font-semibold text-sm">Security Tip</span>
       </div>
       <p className="text-emerald-300/70 text-xs leading-relaxed">
-        Before storing large amounts — test your wallet first. Send a small amount (e.g. 0.001 ETH) to your new address, then import the private key into MetaMask or Trust Wallet and verify you can access and send those funds. Only then use it for cold storage.
+        Always verify your new paper wallet before using it — this step is absolutely essential! Never send funds to a newly generated wallet without testing it first. A single mistake (wrong key, typo, software error) means the permanent, irreversible loss of your funds — no support, no recovery.
+      </p>
+      <p className="text-emerald-300/70 text-xs leading-relaxed">
+        Import the private key into MetaMask or Trust Wallet and verify that the key matches the public key. Then send a small amount (e.g. 0.001 ETH) to your new address and test whether you can access and send this balance. Only then should you use the wallet for cold storage.
       </p>
     </div>
   );
