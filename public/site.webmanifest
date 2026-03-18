@@ -1,6 +1,6 @@
 {
-  "name": "emitkey — ETH Paper Wallet Generator",
-  "short_name": "emitkey",
+  "name": "EmitKey — ETH Paper Wallet Generator",
+  "short_name": "EmitKey",
   "description": "Generate secure Ethereum paper wallets in your browser",
   "start_url": "/",
   "display": "standalone",
