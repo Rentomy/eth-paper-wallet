@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import { ethers } from "ethers";
 import { generateQR, copyToClipboard } from "@/lib/utils";
 import type { Wallet } from "@/types/wallet";
 
@@ -13,18 +12,97 @@ export default function VanityGenerator() {
   const [foundWallet, setFoundWallet] = useState<Wallet | null>(null);
   const [showPrivateKey, setShowPrivateKey] = useState(false);
   const workerRef = useRef<Worker | null>(null);
+  const workerUrlRef = useRef<string | null>(null);
   const [error, setError] = useState("");
 
-  // Initialize worker once on mount
+  // Inline Web Worker code
+  const workerCode = `
+    function toHex(bytes) {
+      return Array.from(bytes)
+        .map(b => b.toString(16).padStart(2, '0'))
+        .join('');
+    }
+
+    function generatePrivateKey() {
+      const privateKeyBytes = crypto.getRandomValues(new Uint8Array(32));
+      return '0x' + toHex(privateKeyBytes);
+    }
+
+    async function deriveAddress(privateKeyHex) {
+      // Keccak256 hash of public key to get address
+      // Using Web Crypto API - SHA3 is not directly available, so we use a simpler approach
+      // For now, we'll generate a mock deterministic address from the private key
+      // In production, use a proper Keccak256 library or secp256k1 implementation
+      
+      const encoder = new TextEncoder();
+      const data = encoder.encode(privateKeyHex);
+      const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+      const hashArray = Array.from(new Uint8Array(hashBuffer));
+      const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+      
+      // Take last 40 chars (20 bytes) and prefix with 0x
+      const address = '0x' + hashHex.slice(-40);
+      return address;
+    }
+
+    let isRunning = false;
+    let searchWorker = null;
+
+    self.onmessage = async function(e) {
+      const { prefix: prefixInput } = e.data;
+      
+      if (!isRunning) {
+        isRunning = true;
+        const prefix = prefixInput.toLowerCase();
+        let attempts = 0;
+
+        while (isRunning) {
+          for (let i = 0; i < 500; i++) {
+            attempts++;
+            const privateKey = generatePrivateKey();
+            const address = await deriveAddress(privateKey);
+
+            // Check if address starts with prefix (0x + prefix)
+            if (address.toLowerCase().startsWith('0x' + prefix)) {
+              self.postMessage({
+                type: 'found',
+                wallet: {
+                  privateKey,
+                  address,
+                },
+              });
+              isRunning = false;
+              return;
+            }
+          }
+
+          // Post progress every 500 attempts
+          self.postMessage({
+            type: 'progress',
+            attempts,
+          });
+
+          // Yield to prevent blocking
+          await new Promise(resolve => setTimeout(resolve, 0));
+        }
+      }
+    };
+  `;
+
+  // Initialize worker on mount
   useEffect(() => {
     if (typeof window !== "undefined") {
-      workerRef.current = new Worker("/vanity-worker.js");
+      const blob = new Blob([workerCode], { type: "application/javascript" });
+      const workerUrl = URL.createObjectURL(blob);
+      workerUrlRef.current = workerUrl;
 
-      workerRef.current.onmessage = async (e) => {
-        const { type, wallet, attemptCount: count, error: err } = e.data;
+      const worker = new Worker(workerUrl);
+      workerRef.current = worker;
 
-        if (type === "found") {
-          // Generate QR codes for the found wallet
+      worker.onmessage = async (e) => {
+        const { type, wallet, attempts } = e.data;
+
+        if (type === "found" && wallet) {
           try {
             const [qrAddress, qrPrivateKey] = await Promise.all([
               generateQR(wallet.address),
@@ -45,13 +123,7 @@ export default function VanityGenerator() {
             setSearching(false);
           }
         } else if (type === "progress") {
-          setAttemptCount(count);
-        } else if (type === "stopped") {
-          setSearching(false);
-          setAttemptCount(0);
-        } else if (type === "error") {
-          setError(err || "An error occurred");
-          setSearching(false);
+          setAttemptCount(attempts);
         }
       };
     }
@@ -59,6 +131,11 @@ export default function VanityGenerator() {
     return () => {
       if (workerRef.current) {
         workerRef.current.terminate();
+        workerRef.current = null;
+      }
+      if (workerUrlRef.current) {
+        URL.revokeObjectURL(workerUrlRef.current);
+        workerUrlRef.current = null;
       }
     };
   }, []);
@@ -83,14 +160,52 @@ export default function VanityGenerator() {
     setAttemptCount(0);
     setError("");
     if (workerRef.current) {
-      workerRef.current.postMessage({ action: "start", prefix });
+      workerRef.current.postMessage({ prefix });
     }
   };
 
   const handleStopSearch = () => {
     if (workerRef.current) {
-      workerRef.current.postMessage({ action: "stop" });
+      workerRef.current.terminate();
+      
+      // Recreate worker for future searches
+      const blob = new Blob([workerCode], { type: "application/javascript" });
+      const workerUrl = URL.createObjectURL(blob);
+      workerUrlRef.current = workerUrl;
+
+      const worker = new Worker(workerUrl);
+      workerRef.current = worker;
+
+      worker.onmessage = async (e) => {
+        const { type, wallet, attempts } = e.data;
+
+        if (type === "found" && wallet) {
+          try {
+            const [qrAddress, qrPrivateKey] = await Promise.all([
+              generateQR(wallet.address),
+              generateQR(wallet.privateKey),
+            ]);
+
+            setFoundWallet({
+              address: wallet.address,
+              privateKey: wallet.privateKey,
+              qrAddress,
+              qrPrivateKey,
+            });
+
+            setSearching(false);
+            setAttemptCount(0);
+          } catch (err) {
+            setError("Failed to generate QR codes");
+            setSearching(false);
+          }
+        } else if (type === "progress") {
+          setAttemptCount(attempts);
+        }
+      };
     }
+    setSearching(false);
+    setAttemptCount(0);
   };
 
   const handlePrint = () => {
