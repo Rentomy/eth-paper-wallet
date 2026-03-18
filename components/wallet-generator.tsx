@@ -113,7 +113,7 @@ export default function WalletGenerator() {
       <button
         onClick={generate}
         disabled={generating}
-        className="w-full py-3 px-6 rounded-lg bg-accent text-accent-foreground font-semibold text-sm tracking-wide transition-opacity duration-150 hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2 focus:ring-offset-background"
+        className="w-full py-3 px-6 rounded-lg bg-accent text-accent-foreground font-semibold text-sm tracking-wide transition-opacity duration-150 hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2 focus:ring-offset-background min-h-[44px]"
       >
         {generating ? "Generating…" : wallet ? "Generate New Wallet" : "Generate Wallet"}
       </button>
@@ -139,15 +139,27 @@ export default function WalletGenerator() {
               Private Key
             </label>
             <div className="flex items-center gap-2">
-              <span className="font-mono text-sm text-foreground bg-card border border-border rounded-md px-3 py-2 break-all flex-1 leading-relaxed">
-                {showPrivateKey
-                  ? wallet.privateKey
-                  : "••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••"}
-              </span>
+              {showPrivateKey ? (
+                <span className="font-mono text-sm text-foreground bg-card border border-border rounded-md px-3 py-2 break-all flex-1 leading-relaxed">
+                  {wallet.privateKey}
+                </span>
+              ) : (
+                <div
+                  className="font-mono text-sm text-foreground bg-card border border-border rounded-md px-3 py-2 flex-1 leading-relaxed"
+                  style={{
+                    letterSpacing: "0.15em",
+                    wordBreak: "break-all",
+                    overflowWrap: "anywhere",
+                    overflow: "hidden",
+                  }}
+                >
+                  {"•".repeat(64)}
+                </div>
+              )}
               <button
                 onClick={() => setShowPrivateKey((v) => !v)}
                 title={showPrivateKey ? "Hide private key" : "Reveal private key"}
-                className="p-2 rounded-md border border-border text-muted-foreground hover:text-foreground hover:border-muted transition-colors"
+                className="p-2 rounded-md border border-border text-muted-foreground hover:text-foreground hover:border-muted transition-colors flex-shrink-0 min-h-[44px] min-w-[44px] flex items-center justify-center"
                 aria-label={showPrivateKey ? "Hide private key" : "Reveal private key"}
               >
                 {showPrivateKey ? <EyeOffIcon /> : <EyeIcon />}
@@ -161,16 +173,16 @@ export default function WalletGenerator() {
           </div>
 
           {/* QR codes */}
-          <div className="grid grid-cols-2 gap-4 mt-2">
+          <div className="flex flex-col sm:flex-row gap-4 mt-2">
             <QRPanel label="Address QR" src={wallet.addressQR} />
             <QRPanel label="Private Key QR" src={wallet.privateKeyQR} blurred={!showPrivateKey} onReveal={() => setShowPrivateKey(true)} />
           </div>
 
           {/* Actions */}
-          <div className="flex gap-3 mt-2">
+          <div className="flex flex-col sm:flex-row gap-3 mt-2 w-full">
             <button
               onClick={handlePrint}
-              className="flex items-center gap-2 px-4 py-2 rounded-lg border border-border text-sm text-foreground hover:bg-card transition-colors"
+              className="flex items-center justify-center gap-2 px-4 py-2 rounded-lg border border-border text-sm text-foreground hover:bg-card transition-colors w-full sm:w-auto min-h-[44px]"
             >
               <PrintIcon />
               Print / Save PDF
@@ -182,7 +194,7 @@ export default function WalletGenerator() {
   );
 }
 
-/* ── Small sub-components ──────────────────────────────────────── */
+/* ── Small sub-components ────────────��─────────────────────────── */
 
 function CopyButton({ value }: { value: string }) {
   const [copied, setCopied] = useState(false);
@@ -196,7 +208,7 @@ function CopyButton({ value }: { value: string }) {
       onClick={handleCopy}
       title="Copy to clipboard"
       aria-label="Copy to clipboard"
-      className="p-2 rounded-md border border-border text-muted-foreground hover:text-accent hover:border-accent transition-colors"
+      className="p-2 rounded-md border border-border text-muted-foreground hover:text-accent hover:border-accent transition-colors flex-shrink-0 min-h-[44px] min-w-[44px] flex items-center justify-center"
     >
       {copied ? <CheckIcon /> : <CopyIcon />}
     </button>

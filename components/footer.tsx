@@ -4,7 +4,7 @@ export default function Footer() {
       <div className="max-w-2xl mx-auto flex flex-col items-center gap-4 text-center">
 
         {/* Security statement */}
-        <div className="flex items-start gap-2 text-xs text-muted-foreground">
+        <div className="flex items-start gap-2 text-xs text-muted-foreground justify-center flex-wrap">
           <ShieldCheckIcon className="w-4 h-4 text-accent shrink-0 mt-0.5" />
           <p>
             All wallet generation happens locally in your browser.
@@ -17,15 +17,21 @@ export default function Footer() {
           href="https://github.com/Rentomy/eth-paper-wallet"
           target="_blank"
           rel="noopener noreferrer"
-          className="inline-flex items-center gap-2 text-xs text-emerald-400 hover:text-emerald-300 transition-colors duration-150"
+          className="inline-flex items-center gap-2 text-xs text-emerald-400 hover:text-emerald-300 transition-colors duration-150 min-h-[44px] min-w-[44px]"
         >
-          <GitHubIcon className="w-4 h-4" />
-          View source code on GitHub
+          <GitHubIcon className="w-4 h-4 shrink-0" />
+          <span>View source code on GitHub</span>
         </a>
 
         {/* Tagline */}
-        <p className="text-xs text-muted-foreground tracking-wide">
-          Open source&nbsp;&middot;&nbsp;Auditable&nbsp;&middot;&nbsp;No server&nbsp;&middot;&nbsp;No tracking
+        <p className="text-xs text-muted-foreground tracking-wide flex flex-wrap justify-center gap-1">
+          <span>Open source</span>
+          <span className="hidden sm:inline">&middot;</span>
+          <span>Auditable</span>
+          <span className="hidden sm:inline">&middot;</span>
+          <span>No server</span>
+          <span className="hidden sm:inline">&middot;</span>
+          <span>No tracking</span>
         </p>
 
       </div>

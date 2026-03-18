@@ -1,10 +1,9 @@
 import dynamic from "next/dynamic";
 import Footer from "@/components/footer";
 
-// Dynamically import client component with no SSR to avoid hydration issues
+// Dynamically import client component to avoid hydration issues
 const WalletGenerator = dynamic(
-  () => import("@/components/wallet-generator"),
-  { ssr: false }
+  () => import("@/components/wallet-generator")
 );
 
 export default function Home() {
@@ -20,7 +19,7 @@ export default function Home() {
           <h1 className="text-3xl font-bold text-foreground text-balance leading-tight mb-3">
             Ethereum Paper Wallet Generator
           </h1>
-          <p className="text-sm text-muted-foreground leading-relaxed text-pretty">
+          <p className="text-sm text-muted-foreground leading-relaxed text-pretty break-words">
             100% client-side. Nothing is transmitted or stored. Your keys are
             generated and stay entirely within your browser.
           </p>
