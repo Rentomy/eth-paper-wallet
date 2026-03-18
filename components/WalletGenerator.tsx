@@ -3,12 +3,15 @@
 import { useState, useCallback } from "react";
 import { ethers } from "ethers";
 import { generateQR, copyToClipboard } from "@/lib/utils";
+import VanityGenerator from "./VanityGenerator";
 import type { Wallet } from "@/types/wallet";
 
 export default function WalletGenerator() {
   const [wallet, setWallet] = useState<Wallet | null>(null);
+  const [vanityWallet, setVanityWallet] = useState<Wallet | null>(null);
   const [generating, setGenerating] = useState(false);
   const [showPrivateKey, setShowPrivateKey] = useState(false);
+  const [vanityShowPrivateKey, setVanityShowPrivateKey] = useState(false);
 
   const generate = useCallback(async () => {
     setGenerating(true);
@@ -30,17 +33,25 @@ export default function WalletGenerator() {
     }
   }, []);
 
+  const handleVanityWalletFound = useCallback((foundWallet: Wallet) => {
+    setVanityWallet(foundWallet);
+    setVanityShowPrivateKey(false);
+  }, []);
+
   const handlePrint = () => {
-    if (!wallet) return;
+    const walletToPrint = vanityWallet || wallet;
+    if (!walletToPrint) return;
 
     const printWindow = window.open("", "_blank");
     if (!printWindow) return;
+
+    const walletType = vanityWallet ? "Vanity Wallet" : "ETH Paper Wallet";
 
     printWindow.document.write(`
       <!DOCTYPE html>
       <html>
         <head>
-          <title>ETH Paper Wallet</title>
+          <title>${walletType}</title>
           <style>
             body { font-family: monospace; background: #fff; color: #000; padding: 40px; }
             .wallet-print { max-width: 600px; margin: 0 auto; border: 2px solid #000; padding: 32px; border-radius: 8px; }
@@ -57,23 +68,23 @@ export default function WalletGenerator() {
         </head>
         <body>
           <div class="wallet-print">
-            <h2>Ethereum Paper Wallet</h2>
+            <h2>${walletType}</h2>
             <p class="warning">Keep this document secure. Never share your private key.</p>
             <div class="section">
               <div class="label">Public Address</div>
-              <div class="value">${wallet.address}</div>
+              <div class="value">${walletToPrint.address}</div>
             </div>
             <div class="section">
               <div class="label">Private Key</div>
-              <div class="value">${wallet.privateKey}</div>
+              <div class="value">${walletToPrint.privateKey}</div>
             </div>
             <div class="qr-pair">
               <div class="qr-box">
-                <img src="${wallet.qrAddress}" width="140" height="140" alt="Address QR" />
+                <img src="${walletToPrint.qrAddress}" width="140" height="140" alt="Address QR" />
                 <div class="qr-label">Public Address</div>
               </div>
               <div class="qr-box">
-                <img src="${wallet.qrPrivateKey}" width="140" height="140" alt="Private Key QR" />
+                <img src="${walletToPrint.qrPrivateKey}" width="140" height="140" alt="Private Key QR" />
                 <div class="qr-label">Private Key</div>
               </div>
             </div>
@@ -98,7 +109,83 @@ export default function WalletGenerator() {
         {generating ? "Generating…" : wallet ? "Generate New Wallet" : "Generate Wallet"}
       </button>
 
-      {wallet && (
+      {/* Vanity Generator Section */}
+      <VanityGenerator onWalletFound={handleVanityWalletFound} />
+
+      {/* Display vanity wallet if found */}
+      {vanityWallet && (
+        <>
+          <div className="pt-2 border-t border-border text-xs text-center text-muted-foreground">
+            Vanity Address Found!
+          </div>
+
+          {/* Address */}
+          <div className="flex flex-col gap-1">
+            <label className="text-xs text-muted-foreground uppercase tracking-widest">
+              Public Address
+            </label>
+            <div className="flex items-center gap-2">
+              <span className="font-mono text-sm text-foreground bg-card border border-border rounded-md px-3 py-2 break-all flex-1 leading-relaxed">
+                {vanityWallet.address}
+              </span>
+              <CopyButton value={vanityWallet.address} />
+            </div>
+          </div>
+
+          {/* Private key */}
+          <div className="flex flex-col gap-1">
+            <label className="text-xs text-muted-foreground uppercase tracking-widest">
+              Private Key
+            </label>
+            <div className="flex items-center gap-2">
+              {vanityShowPrivateKey ? (
+                <span className="font-mono text-sm text-foreground bg-card border border-border rounded-md px-3 py-2 break-all flex-1 leading-relaxed">
+                  {vanityWallet.privateKey}
+                </span>
+              ) : (
+                <div
+                  className="font-mono text-sm text-foreground bg-card border border-border rounded-md px-3 py-2 flex-1 leading-relaxed"
+                  style={{
+                    letterSpacing: "0.15em",
+                    wordBreak: "break-all",
+                    overflowWrap: "anywhere",
+                    overflow: "hidden",
+                  }}
+                >
+                  {"•".repeat(64)}
+                </div>
+              )}
+              <button
+                onClick={() => setVanityShowPrivateKey((v) => !v)}
+                title={vanityShowPrivateKey ? "Hide private key" : "Reveal private key"}
+                className="p-2 rounded-md border border-border text-muted-foreground hover:text-foreground hover:border-muted transition-colors flex-shrink-0 min-h-[44px] min-w-[44px] flex items-center justify-center"
+                aria-label={vanityShowPrivateKey ? "Hide private key" : "Reveal private key"}
+              >
+                {vanityShowPrivateKey ? <EyeOffIcon /> : <EyeIcon />}
+              </button>
+              {vanityShowPrivateKey && <CopyButton value={vanityWallet.privateKey} />}
+            </div>
+            <p className="text-xs text-amber-500 mt-1 flex items-center gap-1">
+              <WarningIcon />
+              Never share your private key. Anyone with it controls your funds.
+            </p>
+          </div>
+
+          {/* QR codes */}
+          <div className="flex flex-col sm:flex-row gap-4 mt-2">
+            <QRPanel label="Address QR" src={vanityWallet.qrAddress} />
+            <QRPanel
+              label="Private Key QR"
+              src={vanityWallet.qrPrivateKey}
+              blurred={!vanityShowPrivateKey}
+              onReveal={() => setVanityShowPrivateKey(true)}
+            />
+          </div>
+        </>
+      )}
+
+      {/* Display regular wallet if found and no vanity wallet */}
+      {wallet && !vanityWallet && (
         <>
           {/* Address */}
           <div className="flex flex-col gap-1">
@@ -174,6 +261,19 @@ export default function WalletGenerator() {
             </button>
           </div>
         </>
+      )}
+
+      {/* Print button for vanity wallet */}
+      {vanityWallet && (
+        <div className="flex flex-col sm:flex-row gap-3 w-full">
+          <button
+            onClick={handlePrint}
+            className="flex items-center justify-center gap-2 px-4 py-2 rounded-lg border border-border text-sm text-foreground hover:bg-card transition-colors w-full sm:w-auto min-h-[44px]"
+          >
+            <PrintIcon />
+            Print / Save PDF
+          </button>
+        </div>
       )}
     </div>
   );
