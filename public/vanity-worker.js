@@ -1,54 +1,38 @@
 // Web Worker for vanity address generation
-importScripts('https://cdn.ethers.org/lib/ethers-5.umd.min.js');
+// This worker ONLY generates random private keys and sends them to the main thread.
+// The main thread uses ethers.js to derive the correct addresses.
+
+function toHex(bytes) {
+  return Array.from(bytes)
+    .map(b => b.toString(16).padStart(2, '0'))
+    .join('');
+}
+
+function generatePrivateKey() {
+  const privateKeyBytes = crypto.getRandomValues(new Uint8Array(32));
+  return '0x' + toHex(privateKeyBytes);
+}
 
 let isRunning = false;
-let attemptCount = 0;
 
-self.onmessage = async (e) => {
-  const { action, prefix } = e.data;
-
-  if (action === 'start') {
+self.onmessage = function(e) {
+  const { prefix: prefixInput } = e.data;
+  if (!isRunning) {
     isRunning = true;
-    attemptCount = 0;
-    const prefixLower = prefix.toLowerCase();
+    const prefix = prefixInput.toLowerCase();
+    let attempts = 0;
     
-    try {
-      while (isRunning) {
-        const wallet = ethers.Wallet.createRandom();
-        attemptCount++;
-
-        // Check if address starts with prefix (0x + prefix)
-        if (wallet.address.toLowerCase().startsWith('0x' + prefixLower)) {
-          // Found a match!
-          self.postMessage({
-            type: 'found',
-            wallet: {
-              address: wallet.address,
-              privateKey: wallet.privateKey,
-            },
-          });
-          break;
-        }
-
-        // Send progress every 500 attempts
-        if (attemptCount % 500 === 0) {
-          self.postMessage({
-            type: 'progress',
-            attemptCount,
-          });
-        }
+    function run() {
+      for (let i = 0; i < 500; i++) {
+        attempts++;
+        const privateKey = generatePrivateKey();
+        self.postMessage({ type: 'candidate', privateKey, attempts });
       }
-    } catch (error) {
-      self.postMessage({
-        type: 'error',
-        error: error.message,
-      });
+      if (isRunning) {
+        setTimeout(run, 0);
+      }
     }
-  } else if (action === 'stop') {
-    isRunning = false;
-    self.postMessage({
-      type: 'stopped',
-      attemptCount,
-    });
+    
+    run();
   }
 };

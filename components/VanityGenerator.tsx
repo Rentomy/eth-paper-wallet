@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect, forwardRef, useImperativeHandle } from "react";
+import { ethers } from "ethers";
 import { generateQR, copyToClipboard } from "@/lib/utils";
 import type { Wallet } from "@/types/wallet";
 
@@ -20,6 +21,8 @@ const VanityGenerator = forwardRef<VanityGeneratorHandle>(function VanityGenerat
   const [error, setError] = useState("");
 
   // Inline Web Worker code (defined early so reset() can reference it)
+  // The worker ONLY generates random private keys and sends them to the main thread
+  // The main thread uses ethers.js to derive the correct address
   const workerCode = `
     function toHex(bytes) {
       return Array.from(bytes)
@@ -32,38 +35,25 @@ const VanityGenerator = forwardRef<VanityGeneratorHandle>(function VanityGenerat
       return '0x' + toHex(privateKeyBytes);
     }
 
-    async function deriveAddress(privateKeyHex) {
-      const encoder = new TextEncoder();
-      const data = encoder.encode(privateKeyHex);
-      const hashBuffer = await crypto.subtle.digest('SHA-256', data);
-      const hashArray = Array.from(new Uint8Array(hashBuffer));
-      const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
-      const address = '0x' + hashHex.slice(-40);
-      return address;
-    }
-
     let isRunning = false;
 
-    self.onmessage = async function(e) {
+    self.onmessage = function(e) {
       const { prefix: prefixInput } = e.data;
       if (!isRunning) {
         isRunning = true;
         const prefix = prefixInput.toLowerCase();
         let attempts = 0;
-        while (isRunning) {
+        function run() {
           for (let i = 0; i < 500; i++) {
             attempts++;
             const privateKey = generatePrivateKey();
-            const address = await deriveAddress(privateKey);
-            if (address.toLowerCase().startsWith('0x' + prefix)) {
-              self.postMessage({ type: 'found', wallet: { privateKey, address } });
-              isRunning = false;
-              return;
-            }
+            self.postMessage({ type: 'candidate', privateKey, attempts });
           }
-          self.postMessage({ type: 'progress', attempts });
-          await new Promise(resolve => setTimeout(resolve, 0));
+          if (isRunning) {
+            setTimeout(run, 0);
+          }
         }
+        run();
       }
     };
   `;
@@ -79,21 +69,32 @@ const VanityGenerator = forwardRef<VanityGeneratorHandle>(function VanityGenerat
         const worker = new Worker(workerUrl);
         workerRef.current = worker;
         worker.onmessage = async (e) => {
-          const { type, wallet, attempts } = e.data;
-          if (type === "found" && wallet) {
+          const { type, privateKey, attempts } = e.data;
+          if (type === "candidate" && privateKey && prefix) {
             try {
-              const [qrAddress, qrPrivateKey] = await Promise.all([
-                generateQR(wallet.address),
-                generateQR(wallet.privateKey),
-              ]);
-              setFoundWallet({ address: wallet.address, privateKey: wallet.privateKey, qrAddress, qrPrivateKey });
-              setSearching(false);
-              setAttemptCount(0);
-            } catch {
-              setError("Failed to generate QR codes");
+              const wallet = new ethers.Wallet(privateKey);
+              if (wallet.address.toLowerCase().startsWith('0x' + prefix.toLowerCase())) {
+                try {
+                  const [qrAddress, qrPrivateKey] = await Promise.all([
+                    generateQR(wallet.address),
+                    generateQR(wallet.privateKey),
+                  ]);
+                  setFoundWallet({ address: wallet.address, privateKey: wallet.privateKey, qrAddress, qrPrivateKey });
+                  setSearching(false);
+                  setAttemptCount(0);
+                  if (workerRef.current) {
+                    workerRef.current.terminate();
+                  }
+                } catch {
+                  setError("Failed to generate QR codes");
+                  setSearching(false);
+                }
+              }
+            } catch (err) {
+              setError("Error deriving address");
               setSearching(false);
             }
-          } else if (type === "progress") {
+          } else if (type === "candidate") {
             setAttemptCount(attempts);
           }
         };
@@ -119,29 +120,43 @@ const VanityGenerator = forwardRef<VanityGeneratorHandle>(function VanityGenerat
       workerRef.current = worker;
 
       worker.onmessage = async (e) => {
-        const { type, wallet, attempts } = e.data;
+        const { type, privateKey, attempts } = e.data;
 
-        if (type === "found" && wallet) {
+        if (type === "candidate" && privateKey && prefix) {
+          // Derive the address from the private key using ethers.js
           try {
-            const [qrAddress, qrPrivateKey] = await Promise.all([
-              generateQR(wallet.address),
-              generateQR(wallet.privateKey),
-            ]);
+            const wallet = new ethers.Wallet(privateKey);
+            if (wallet.address.toLowerCase().startsWith('0x' + prefix.toLowerCase())) {
+              // Found a match!
+              try {
+                const [qrAddress, qrPrivateKey] = await Promise.all([
+                  generateQR(wallet.address),
+                  generateQR(wallet.privateKey),
+                ]);
 
-            setFoundWallet({
-              address: wallet.address,
-              privateKey: wallet.privateKey,
-              qrAddress,
-              qrPrivateKey,
-            });
+                setFoundWallet({
+                  address: wallet.address,
+                  privateKey: wallet.privateKey,
+                  qrAddress,
+                  qrPrivateKey,
+                });
 
-            setSearching(false);
-            setAttemptCount(0);
+                setSearching(false);
+                setAttemptCount(0);
+                if (workerRef.current) {
+                  workerRef.current.terminate();
+                }
+              } catch (err) {
+                setError("Failed to generate QR codes");
+                setSearching(false);
+              }
+            }
           } catch (err) {
-            setError("Failed to generate QR codes");
+            setError("Error deriving address");
             setSearching(false);
           }
-        } else if (type === "progress") {
+        } else if (type === "candidate") {
+          // Update progress with attempts
           setAttemptCount(attempts);
         }
       };
@@ -157,7 +172,7 @@ const VanityGenerator = forwardRef<VanityGeneratorHandle>(function VanityGenerat
         workerUrlRef.current = null;
       }
     };
-  }, []);
+  }, [prefix]);
 
   const handlePrefixChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value.toLowerCase();
@@ -198,29 +213,40 @@ const VanityGenerator = forwardRef<VanityGeneratorHandle>(function VanityGenerat
       workerRef.current = worker;
 
       worker.onmessage = async (e) => {
-        const { type, wallet, attempts } = e.data;
+        const { type, privateKey, attempts } = e.data;
 
-        if (type === "found" && wallet) {
+        if (type === "candidate" && privateKey && prefix) {
           try {
-            const [qrAddress, qrPrivateKey] = await Promise.all([
-              generateQR(wallet.address),
-              generateQR(wallet.privateKey),
-            ]);
+            const wallet = new ethers.Wallet(privateKey);
+            if (wallet.address.toLowerCase().startsWith('0x' + prefix.toLowerCase())) {
+              try {
+                const [qrAddress, qrPrivateKey] = await Promise.all([
+                  generateQR(wallet.address),
+                  generateQR(wallet.privateKey),
+                ]);
 
-            setFoundWallet({
-              address: wallet.address,
-              privateKey: wallet.privateKey,
-              qrAddress,
-              qrPrivateKey,
-            });
+                setFoundWallet({
+                  address: wallet.address,
+                  privateKey: wallet.privateKey,
+                  qrAddress,
+                  qrPrivateKey,
+                });
 
-            setSearching(false);
-            setAttemptCount(0);
+                setSearching(false);
+                setAttemptCount(0);
+                if (workerRef.current) {
+                  workerRef.current.terminate();
+                }
+              } catch (err) {
+                setError("Failed to generate QR codes");
+                setSearching(false);
+              }
+            }
           } catch (err) {
-            setError("Failed to generate QR codes");
+            setError("Error deriving address");
             setSearching(false);
           }
-        } else if (type === "progress") {
+        } else if (type === "candidate") {
           setAttemptCount(attempts);
         }
       };
