@@ -98,25 +98,23 @@ export default function WalletGenerator() {
 
   return (
     <div className="flex flex-col gap-6">
-      {/* Top row: generate button + optional reset */}
-      <div className="relative">
-        <button
-          onClick={generate}
-          disabled={generating}
-          className="w-full py-3 px-6 rounded-lg bg-accent text-accent-foreground font-semibold text-sm tracking-wide transition-opacity duration-150 hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2 focus:ring-offset-background min-h-[44px]"
-        >
-          {generating ? "Generating…" : wallet ? "Generate New Wallet" : "Generate Wallet"}
-        </button>
-        {wallet && (
-          <button
-            onClick={handleReset}
-            aria-label="Reset session"
-            className="absolute -top-5 right-0 text-xs text-zinc-500 hover:text-zinc-300 transition-colors"
-          >
-            ↺ New Session
-          </button>
-        )}
-      </div>
+      {/* Fixed Reset button — always visible in top-right */}
+      <button
+        onClick={handleReset}
+        aria-label="Reset session"
+        className="fixed top-4 right-4 z-50 text-xs text-zinc-500 hover:text-zinc-300 transition-colors"
+      >
+        ↺ New Session
+      </button>
+
+      {/* Generate button */}
+      <button
+        onClick={generate}
+        disabled={generating}
+        className="w-full py-3 px-6 rounded-lg bg-accent text-accent-foreground font-semibold text-sm tracking-wide transition-opacity duration-150 hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2 focus:ring-offset-background min-h-[44px]"
+      >
+        {generating ? "Generating…" : wallet ? "Generate New Wallet" : "Generate Wallet"}
+      </button>
 
       {/* Vanity Generator Section */}
       <VanityGenerator ref={vanityRef} />
@@ -215,7 +213,7 @@ function SecurityTip() {
         <span className="text-emerald-400 font-semibold text-sm">Security Tip</span>
       </div>
       <p className="text-emerald-300/70 text-xs leading-relaxed">
-        Before storing large amounts — test your wallet first. Send a small amount (e.g. 0.001 ETH) to your new address, then import the private key into MetaMask or MyEtherWallet and verify you can access and send those funds. Only then use it for cold storage.
+        Before storing large amounts — test your wallet first. Send a small amount (e.g. 0.001 ETH) to your new address, then import the private key into MetaMask or Trust Wallet and verify you can access and send those funds. Only then use it for cold storage.
       </p>
     </div>
   );
