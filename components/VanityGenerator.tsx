@@ -1,6 +1,14 @@
 "use client";
+// VanityGenerator v2 - Fixed hooks with useCallback
 
-import { useState, useRef, useEffect, forwardRef, useImperativeHandle, useCallback } from "react";
+import {
+  useState,
+  useRef,
+  useEffect,
+  forwardRef,
+  useImperativeHandle,
+  useCallback,
+} from "react";
 import { ethers } from "ethers";
 import { generateQR, copyToClipboard } from "@/lib/utils";
 import type { Wallet } from "@/types/wallet";
