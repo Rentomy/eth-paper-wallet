@@ -216,7 +216,7 @@ function SecurityTip() {
         Never fund a new paper wallet without testing it first. Any error will result in the permanent loss of your assets.
       </p>
       <p className="text-emerald-300/70 text-xs leading-relaxed">
-        Import the private key into MetaMask or Trust Wallet and verify that the key matches the public key. Then send a small amount (e.g. 0.001 ETH) to your new address and test whether you can access and send this balance. Only then should you use the wallet for cold storage.
+        Import the private key into a wallet like MetaMask or Trust Wallet to ensure it matches the public address. Perform a test transaction by sending a small amount (e.g., 0.001 ETH) to the address. Confirm you can spend those funds before moving larger amounts into cold storage.
       </p>
     </div>
   );
