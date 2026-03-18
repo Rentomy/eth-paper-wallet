@@ -477,7 +477,7 @@ function SecurityTip() {
     <div className="bg-emerald-950/30 border border-emerald-900/40 rounded-lg p-4 flex flex-col gap-2">
       <div className="flex items-center gap-2">
         <ShieldCheckIcon />
-        <span className="text-emerald-400 font-semibold text-sm">Security Tip</span>
+        <span className="text-emerald-400 font-semibold text-sm">Verify Wallet Before Use</span>
       </div>
       <p className="text-emerald-300/70 text-xs leading-relaxed">
         Always verify your new paper wallet before using it — this step is absolutely essential! Never send funds to a newly generated wallet without testing it first. A single mistake (wrong key, typo, software error) means the permanent, irreversible loss of your funds — no support, no recovery.
