@@ -1,5 +1,5 @@
 "use client";
-// VanityGenerator v2 - Fixed hooks with useCallback
+// VanityGenerator v3 - Restructured layout
 
 import {
   useState,
@@ -44,18 +44,23 @@ export interface VanityGeneratorHandle {
 }
 
 const VanityGenerator = forwardRef<VanityGeneratorHandle>(function VanityGenerator(_props, ref) {
-  const [isOpen, setIsOpen] = useState(false);
+  // Generate New Wallet state
+  const [isGenerating, setIsGenerating] = useState(false);
+  const [generatedWallet, setGeneratedWallet] = useState<Wallet | null>(null);
+
+  // Vanity Address state
+  const [vanityOpen, setVanityOpen] = useState(false);
   const [prefix, setPrefix] = useState("");
   const [searching, setSearching] = useState(false);
   const [attemptCount, setAttemptCount] = useState(0);
-  const [foundWallet, setFoundWallet] = useState<Wallet | null>(null);
+  const [vanityWallet, setVanityWallet] = useState<Wallet | null>(null);
   const [showPrivateKey, setShowPrivateKey] = useState(false);
   const workerRef = useRef<Worker | null>(null);
   const workerUrlRef = useRef<string | null>(null);
   const prefixRef = useRef(prefix);
   const searchingRef = useRef(searching);
   const [error, setError] = useState("");
-  
+
   // Verify Wallet state
   const [verifyOpen, setVerifyOpen] = useState(false);
   const [verifyPrivateKey, setVerifyPrivateKey] = useState("");
@@ -88,7 +93,7 @@ const VanityGenerator = forwardRef<VanityGeneratorHandle>(function VanityGenerat
             try {
               const qrAddress = await generateQR(w.address);
               const qrPrivateKey = await generateQR(w.privateKey);
-              setFoundWallet({ address: w.address, privateKey: w.privateKey, qrAddress, qrPrivateKey });
+              setVanityWallet({ address: w.address, privateKey: w.privateKey, qrAddress, qrPrivateKey });
               setSearching(false);
               setAttemptCount(0);
             } catch {
@@ -120,14 +125,20 @@ const VanityGenerator = forwardRef<VanityGeneratorHandle>(function VanityGenerat
         workerRef.current.terminate();
         createWorker();
       }
+      setGeneratedWallet(null);
+      setVanityWallet(null);
       setSearching(false);
       setAttemptCount(0);
-      setFoundWallet(null);
       setPrefix("");
       prefixRef.current = "";
       setError("");
       setShowPrivateKey(false);
-      setIsOpen(false);
+      setVanityOpen(false);
+      setVerifyPrivateKey("");
+      setVerifiedAddress(null);
+      setVerifyError(null);
+      setShowVerifyKey(false);
+      setVerifyOpen(false);
     },
   }), [createWorker]);
 
@@ -149,14 +160,32 @@ const VanityGenerator = forwardRef<VanityGeneratorHandle>(function VanityGenerat
     };
   }, [createWorker]);
 
+  // Generate random wallet
+  const handleGenerateWallet = async () => {
+    setIsGenerating(true);
+    try {
+      const wallet = ethers.Wallet.createRandom();
+      const qrAddress = await generateQR(wallet.address);
+      const qrPrivateKey = await generateQR(wallet.privateKey);
+      setGeneratedWallet({
+        address: wallet.address,
+        privateKey: wallet.privateKey,
+        qrAddress,
+        qrPrivateKey,
+      });
+    } catch {
+      setError("Failed to generate wallet");
+    } finally {
+      setIsGenerating(false);
+    }
+  };
+
   const handlePrefixChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value.toLowerCase();
-    // Allow any alphanumeric character (0-9, a-z) and max 6 chars
     if (/^[0-9a-z]*$/.test(value) && value.length <= 6) {
       setPrefix(value);
       setError("");
     } else if (value.length <= 6) {
-      // Accept the value but keep the error empty - we'll show the info note instead
       setPrefix(value.toLowerCase());
       setError("");
     }
@@ -178,16 +207,13 @@ const VanityGenerator = forwardRef<VanityGeneratorHandle>(function VanityGenerat
   const handleStopSearch = () => {
     if (workerRef.current) {
       workerRef.current.terminate();
-      // Recreate worker for future searches
       createWorker();
     }
     setSearching(false);
     setAttemptCount(0);
   };
 
-  const handlePrint = () => {
-    if (!foundWallet) return;
-
+  const handlePrint = (wallet: Wallet) => {
     const printWindow = window.open("", "_blank");
     if (!printWindow) return;
 
@@ -216,19 +242,19 @@ const VanityGenerator = forwardRef<VanityGeneratorHandle>(function VanityGenerat
             <p class="warning">Keep this document secure. Never share your private key.</p>
             <div class="section">
               <div class="label">Public Address</div>
-              <div class="value">${foundWallet.address}</div>
+              <div class="value">${wallet.address}</div>
             </div>
             <div class="section">
               <div class="label">Private Key</div>
-              <div class="value">${foundWallet.privateKey}</div>
+              <div class="value">${wallet.privateKey}</div>
             </div>
             <div class="qr-pair">
               <div class="qr-box">
-                <img src="${foundWallet.qrAddress}" width="140" height="140" alt="Address QR" />
+                <img src="${wallet.qrAddress}" width="140" height="140" alt="Address QR" />
                 <div class="qr-label">Public Address</div>
               </div>
               <div class="qr-box">
-                <img src="${foundWallet.qrPrivateKey}" width="140" height="140" alt="Private Key QR" />
+                <img src="${wallet.qrPrivateKey}" width="140" height="140" alt="Private Key QR" />
                 <div class="qr-label">Private Key</div>
               </div>
             </div>
@@ -242,21 +268,14 @@ const VanityGenerator = forwardRef<VanityGeneratorHandle>(function VanityGenerat
     printWindow.close();
   };
 
-  const estimatedTime = (prefixLength: number): string => {
-    if (prefixLength === 4) return "seconds";
-    if (prefixLength === 5) return "minutes";
-    if (prefixLength === 6) return "up to 1 hour";
-    return "";
-  };
-
   const handleVerifyWallet = () => {
     try {
-      const wallet = new ethers.Wallet(verifyPrivateKey.trim());
-      setVerifiedAddress(wallet.address);
+      const w = new ethers.Wallet(verifyPrivateKey.trim());
+      setVerifiedAddress(w.address);
       setVerifyError(null);
-    } catch (e) {
+    } catch {
       setVerifiedAddress(null);
-      setVerifyError("Invalid private key");
+      setVerifyError("Invalid private key — check for typos or missing characters.");
     }
   };
 
@@ -267,37 +286,60 @@ const VanityGenerator = forwardRef<VanityGeneratorHandle>(function VanityGenerat
     setShowVerifyKey(false);
   };
 
-  const handleVerifyCollapse = () => {
+  const handleNewSession = () => {
+    setGeneratedWallet(null);
+    setVanityWallet(null);
+    setSearching(false);
+    setAttemptCount(0);
+    setPrefix("");
+    prefixRef.current = "";
+    setError("");
+    setShowPrivateKey(false);
+    setVanityOpen(false);
+    setVerifyPrivateKey("");
+    setVerifiedAddress(null);
+    setVerifyError(null);
+    setShowVerifyKey(false);
     setVerifyOpen(false);
-    handleClearVerify();
+    if (workerRef.current) {
+      workerRef.current.terminate();
+      createWorker();
+    }
   };
 
   return (
-    <div className="w-full border border-zinc-700 rounded-xl p-4" data-vanity>
-      {/* Toggle button */}
+    <div className="w-full space-y-3" data-vanity>
+      {/* 1. Generate New Wallet Button */}
       <button
-        onClick={() => setIsOpen(!isOpen)}
-        className="w-full flex items-center justify-between py-3 px-6 rounded-lg bg-card border border-border text-left font-semibold text-sm tracking-wide transition-opacity duration-150 hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2 focus:ring-offset-background min-h-[44px]"
+        onClick={handleGenerateWallet}
+        disabled={isGenerating}
+        className="w-full py-3 px-6 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-zinc-950 font-semibold text-base transition-colors disabled:opacity-50 disabled:cursor-not-allowed min-h-[52px]"
       >
-        <span className="flex items-center gap-2">
-          <span>✦</span>
-          <span>Vanity Address — Custom Prefix (optional)</span>
-        </span>
-        <span
-          className="transform transition-transform"
-          style={{ transform: isOpen ? "rotate(180deg)" : "rotate(0deg)" }}
-        >
-          ▼
-        </span>
+        {isGenerating ? "Generating..." : "Generate New Wallet"}
       </button>
 
-      {/* Expanded content */}
-      {isOpen && (
-        <div className="mt-4 space-y-4">
-          {/* Input field - only show if no wallet found yet */}
-          {!foundWallet && (
-            <>
-              <div className="flex flex-col gap-2">
+      {/* 2. Vanity Address Accordion */}
+      <div className="border border-zinc-700 rounded-xl overflow-hidden">
+        <button
+          onClick={() => setVanityOpen(!vanityOpen)}
+          className="w-full flex items-center justify-between py-3 px-6 bg-zinc-900 hover:bg-zinc-800 transition-colors text-left font-semibold text-base text-white min-h-[52px]"
+        >
+          <span className="flex items-center gap-2">
+            <span>✦</span>
+            <span>Vanity Address (optional)</span>
+          </span>
+          <span
+            className="transform transition-transform"
+            style={{ transform: vanityOpen ? "rotate(180deg)" : "rotate(0deg)" }}
+          >
+            ▼
+          </span>
+        </button>
+
+        {vanityOpen && (
+          <div className="p-6 space-y-4 bg-background border-t border-zinc-700">
+            {!vanityWallet && (
+              <>
                 <input
                   type="text"
                   value={prefix}
@@ -308,118 +350,307 @@ const VanityGenerator = forwardRef<VanityGeneratorHandle>(function VanityGenerat
                   className="w-full px-3 py-2 bg-card border border-border rounded-md text-foreground font-mono text-sm placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-accent disabled:opacity-50"
                 />
                 <div className="flex items-center justify-between">
-                  <p className="text-xs text-muted-foreground">
-                    {prefix.length}/6
-                  </p>
-                  {prefix && error && (
-                    <p className="text-xs text-red-500">{error}</p>
-                  )}
+                  <p className="text-xs text-muted-foreground">{prefix.length}/6</p>
+                  {prefix && error && <p className="text-xs text-red-500">{error}</p>}
                 </div>
-              </div>
 
-              {/* Helper text */}
-              {prefix && (
-                <>
-                  <p className="text-xs text-muted-foreground leading-relaxed">
-                    Max 6 characters · letters and numbers allowed · case-insensitive
-                  </p>
+                {prefix && (
+                  <>
+                    <p className="text-xs text-muted-foreground leading-relaxed">
+                      Max 6 characters · letters and numbers allowed · case-insensitive
+                    </p>
 
-                  {/* Non-hex character warning */}
-                  {!/^[0-9a-f]*$/.test(prefix) && (
-                    <div className="bg-card border border-border rounded-md p-2 text-xs text-muted-foreground flex items-start gap-2">
-                      <span className="text-sm shrink-0 mt-0.5">ℹ️</span>
-                      <span>
-                        Note: Ethereum addresses only contain 0–9 and a–f. Characters like '{(() => {
-                          const invalidChars = prefix.split('').filter(c => !/^[0-9a-f]$/.test(c));
-                          return invalidChars.filter((c, i, arr) => arr.indexOf(c) === i).slice(0, 3).join(', ');
-                        })()}' will never match.
-                      </span>
-                    </div>
-                  )}
-                </>
-              )}
+                    {!/^[0-9a-f]*$/.test(prefix) && (
+                      <div className="bg-card border border-border rounded-md p-2 text-xs text-muted-foreground flex items-start gap-2">
+                        <span className="text-sm shrink-0 mt-0.5">ℹ️</span>
+                        <span>
+                          Note: Ethereum addresses only contain 0–9 and a–f. Characters like '{(() => {
+                            const invalidChars = prefix.split('').filter(c => !/^[0-9a-f]$/.test(c));
+                            return invalidChars.filter((c, i, arr) => arr.indexOf(c) === i).slice(0, 3).join(', ');
+                          })()}' will never match.
+                        </span>
+                      </div>
+                    )}
 
-              {/* Warning banner */}
-              {prefix && (
-                <div className="bg-amber-900/20 border border-amber-700 rounded-md p-3 text-xs text-amber-500 flex items-start gap-2">
-                  <span className="text-base shrink-0 mt-0.5">⚡</span>
-                  <span>
-                    Your device's CPU will work hard during the search. This is 100% local — nothing is sent to any server.
-                  </span>
-                </div>
-              )}
+                    {prefix && (
+                      <div className="bg-amber-900/20 border border-amber-700 rounded-md p-3 text-xs text-amber-500 flex items-start gap-2">
+                        <span className="text-base shrink-0 mt-0.5">⚡</span>
+                        <span>
+                          Your device's CPU will work hard during the search. This is 100% local — nothing is sent to any server.
+                        </span>
+                      </div>
+                    )}
 
-              {/* Mobile warning */}
-              {prefix && prefix.length > 4 && (
-                <div className="sm:hidden bg-amber-900/20 border border-amber-700 rounded-md p-3 text-xs text-amber-500 flex items-start gap-2">
-                  <span className="text-base shrink-0 mt-0.5">⚠</span>
-                  <span>
-                    On mobile devices, battery and performance may be affected. We recommend using a desktop for prefixes longer than 4 characters.
-                  </span>
-                </div>
-              )}
-
-              {/* Buttons */}
-              <div className="flex gap-3 pt-2">
-                {!searching ? (
-                  <button
-                    onClick={handleStartSearch}
-                    disabled={!prefix || searching}
-                    className="flex-1 py-2 px-4 rounded-lg bg-emerald-600 text-white font-semibold text-sm transition-opacity hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed min-h-[44px] flex items-center justify-center"
-                  >
-                    Start Search
-                  </button>
-                ) : (
-                  <button
-                    onClick={handleStopSearch}
-                    className="flex-1 py-2 px-4 rounded-lg bg-zinc-700 text-white font-semibold text-sm transition-opacity hover:opacity-90 min-h-[44px] flex items-center justify-center"
-                  >
-                    Stop
-                  </button>
+                    {prefix && prefix.length > 4 && (
+                      <div className="sm:hidden bg-amber-900/20 border border-amber-700 rounded-md p-3 text-xs text-amber-500 flex items-start gap-2">
+                        <span className="text-base shrink-0 mt-0.5">⚠</span>
+                        <span>
+                          On mobile devices, battery and performance may be affected. We recommend using a desktop for prefixes longer than 4 characters.
+                        </span>
+                      </div>
+                    )}
+                  </>
                 )}
-              </div>
 
-              {/* Live counter */}
-              {searching && (
-                <div className="flex items-center justify-center gap-2 py-2">
-                  <div className="animate-spin w-4 h-4 border-2 border-accent border-t-transparent rounded-full" />
-                  <span className="text-sm text-muted-foreground font-mono">
-                    Searching... {attemptCount.toLocaleString()} attempts
+                <div className="flex gap-3 pt-2">
+                  {!searching ? (
+                    <button
+                      onClick={handleStartSearch}
+                      disabled={!prefix || searching}
+                      className="flex-1 py-2 px-4 rounded-lg bg-emerald-600 text-white font-semibold text-sm transition-opacity hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed min-h-[44px] flex items-center justify-center"
+                    >
+                      Start Search
+                    </button>
+                  ) : (
+                    <button
+                      onClick={handleStopSearch}
+                      className="flex-1 py-2 px-4 rounded-lg bg-zinc-700 text-white font-semibold text-sm transition-opacity hover:opacity-90 min-h-[44px] flex items-center justify-center"
+                    >
+                      Stop
+                    </button>
+                  )}
+                </div>
+
+                {searching && (
+                  <div className="flex items-center justify-center gap-2 py-2">
+                    <div className="animate-spin w-4 h-4 border-2 border-accent border-t-transparent rounded-full" />
+                    <span className="text-sm text-muted-foreground font-mono">
+                      Searching... {attemptCount.toLocaleString()} attempts
+                    </span>
+                  </div>
+                )}
+
+                <div className="bg-card border border-border rounded-md p-3 text-xs text-muted-foreground flex items-start gap-2">
+                  <span className="text-sm shrink-0 mt-0.5">🔒</span>
+                  <span>
+                    All generation happens in your browser via a Web Worker. Your CPU does the work — no data ever leaves your device.
                   </span>
                 </div>
-              )}
+              </>
+            )}
 
-              {/* Transparency notice */}
-              <div className="bg-card border border-border rounded-md p-3 text-xs text-muted-foreground flex items-start gap-2">
-                <span className="text-sm shrink-0 mt-0.5">🔒</span>
-                <span>
-                  All generation happens in your browser via a Web Worker. Your CPU does the work — no data ever leaves your device.
-                </span>
+            {vanityWallet && (
+              <>
+                <div className="pt-2 border-t border-border text-xs text-center text-emerald-500 font-semibold">
+                  Vanity Address Found!
+                </div>
+
+                <div className="flex flex-col gap-1">
+                  <label className="text-xs text-muted-foreground uppercase tracking-widest">
+                    Public Address
+                  </label>
+                  <div className="flex items-center gap-2">
+                    <span className="font-mono text-sm text-foreground bg-card border border-border rounded-md px-3 py-2 break-all flex-1 leading-relaxed">
+                      {vanityWallet.address}
+                    </span>
+                    <CopyButton value={vanityWallet.address} />
+                  </div>
+                </div>
+
+                <div className="flex flex-col gap-1">
+                  <label className="text-xs text-muted-foreground uppercase tracking-widest">
+                    Private Key
+                  </label>
+                  <div className="flex items-center gap-2">
+                    {showPrivateKey ? (
+                      <span className="font-mono text-sm text-foreground bg-card border border-border rounded-md px-3 py-2 break-all flex-1 leading-relaxed">
+                        {vanityWallet.privateKey}
+                      </span>
+                    ) : (
+                      <div
+                        className="font-mono text-sm text-foreground bg-card border border-border rounded-md px-3 py-2 flex-1 leading-relaxed"
+                        style={{
+                          letterSpacing: "0.15em",
+                          wordBreak: "break-all",
+                          overflowWrap: "anywhere",
+                          overflow: "hidden",
+                        }}
+                      >
+                        {"•".repeat(64)}
+                      </div>
+                    )}
+                    <button
+                      onClick={() => setShowPrivateKey((v) => !v)}
+                      title={showPrivateKey ? "Hide private key" : "Reveal private key"}
+                      className="p-2 rounded-md border border-border text-muted-foreground hover:text-foreground hover:border-muted transition-colors flex-shrink-0 min-h-[44px] min-w-[44px] flex items-center justify-center"
+                      aria-label={showPrivateKey ? "Hide private key" : "Reveal private key"}
+                    >
+                      {showPrivateKey ? <EyeOffIcon /> : <EyeIcon />}
+                    </button>
+                    {showPrivateKey && <CopyButton value={vanityWallet.privateKey} />}
+                  </div>
+                  <p className="text-xs text-amber-500 mt-1 flex items-center gap-1">
+                    <WarningIcon />
+                    Never share your private key. Anyone with it controls your funds.
+                  </p>
+                </div>
+
+                <div className="flex flex-col sm:flex-row gap-4 mt-2">
+                  <QRPanel label="Address QR" src={vanityWallet.qrAddress} />
+                  <QRPanel
+                    label="Private Key QR"
+                    src={vanityWallet.qrPrivateKey}
+                    blurred={!showPrivateKey}
+                    onReveal={() => setShowPrivateKey(true)}
+                  />
+                </div>
+
+                <div className="flex flex-col sm:flex-row gap-3 pt-2 w-full">
+                  <button
+                    onClick={() => handlePrint(vanityWallet)}
+                    className="flex items-center justify-center gap-2 px-4 py-2 rounded-lg border border-border text-sm text-foreground hover:bg-card transition-colors w-full sm:w-auto min-h-[44px]"
+                  >
+                    <PrintIcon />
+                    Print / Save PDF
+                  </button>
+                </div>
+              </>
+            )}
+          </div>
+        )}
+      </div>
+
+      {/* 3. Verify Wallet Accordion */}
+      <div className="border border-zinc-700 rounded-xl overflow-hidden">
+        <button
+          onClick={() => setVerifyOpen(!verifyOpen)}
+          className="w-full flex items-center justify-between py-3 px-6 bg-zinc-900 hover:bg-zinc-800 transition-colors text-left font-semibold text-base text-white min-h-[52px]"
+        >
+          <span className="flex items-center gap-2">
+            <span>🔍</span>
+            <span>Verify Wallet</span>
+          </span>
+          <span
+            className="transform transition-transform"
+            style={{ transform: verifyOpen ? "rotate(180deg)" : "rotate(0deg)" }}
+          >
+            ▼
+          </span>
+        </button>
+
+        {verifyOpen && (
+          <div className="p-6 space-y-4 bg-background border-t border-zinc-700">
+            <p className="text-xs text-muted-foreground leading-relaxed">
+              Enter your private key below to verify it matches your public address. This runs entirely in your browser — your key is never transmitted anywhere.
+            </p>
+
+            <div className="bg-amber-900/20 border border-amber-700 rounded-md p-3 text-xs text-amber-500 flex items-start gap-2">
+              <span className="text-base shrink-0 mt-0.5">⚠</span>
+              <span>
+                Never enter a private key that holds significant funds into any website — including this one. This tool is intended for freshly generated wallets only.
+              </span>
+            </div>
+
+            <div className="flex flex-col gap-2">
+              <div className="relative">
+                <input
+                  type={showVerifyKey ? "text" : "password"}
+                  value={verifyPrivateKey}
+                  onChange={(e) => {
+                    setVerifyPrivateKey(e.target.value);
+                    setVerifiedAddress(null);
+                    setVerifyError(null);
+                  }}
+                  placeholder="Paste your private key here (0x...)"
+                  className="w-full px-3 py-2 bg-card border border-border rounded-md text-foreground font-mono text-sm placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-accent pr-10"
+                />
+                <button
+                  onClick={() => setShowVerifyKey(!showVerifyKey)}
+                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                  aria-label={showVerifyKey ? "Hide key" : "Show key"}
+                >
+                  {showVerifyKey ? "👁" : "👁‍🗨"}
+                </button>
               </div>
-            </>
-          )}
+            </div>
 
-          {/* Display found wallet */}
-          {foundWallet && (
+            <div className="flex gap-2">
+              <button
+                onClick={handleVerifyWallet}
+                disabled={!verifyPrivateKey.trim()}
+                className="flex-1 py-2 px-4 rounded-lg bg-emerald-600 text-white font-semibold text-sm transition-opacity hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed min-h-[44px] flex items-center justify-center"
+              >
+                Verify
+              </button>
+              <button
+                onClick={handleClearVerify}
+                className="flex-1 py-2 px-4 rounded-lg bg-zinc-700 text-white font-semibold text-sm transition-opacity hover:opacity-90 min-h-[44px] flex items-center justify-center"
+              >
+                Clear
+              </button>
+            </div>
+
+            {verifiedAddress && (
+              <div className="bg-emerald-950/30 border border-emerald-900/40 rounded-lg p-4 space-y-2">
+                <div className="flex items-center gap-2 text-emerald-400 font-semibold text-sm">
+                  <span>✅</span>
+                  <span>Match confirmed</span>
+                </div>
+                <p className="text-xs text-emerald-300/70">Your private key correctly corresponds to this address:</p>
+                <div className="bg-card border border-border rounded-md p-3 flex items-center justify-between gap-2">
+                  <code className="text-sm font-mono text-emerald-300 break-all">{verifiedAddress}</code>
+                  <CopyButton value={verifiedAddress} />
+                </div>
+              </div>
+            )}
+
+            {verifyError && (
+              <div className="bg-red-950/30 border border-red-900/40 rounded-lg p-4 space-y-2">
+                <div className="flex items-center gap-2 text-red-400 font-semibold text-sm">
+                  <span>❌</span>
+                  <span>Invalid private key</span>
+                </div>
+                <p className="text-xs text-red-300/70">{verifyError}</p>
+              </div>
+            )}
+
+            <div className="space-y-2 pt-2 border-t border-border">
+              <div className="text-xs text-muted-foreground flex items-start gap-2">
+                <span className="shrink-0 mt-0.5">🔒</span>
+                <span>Runs 100% locally via ethers.js — nothing is transmitted</span>
+              </div>
+              <div className="text-xs text-muted-foreground flex items-start gap-2">
+                <span className="shrink-0 mt-0.5">🌐</span>
+                <span>For maximum security: disconnect from internet before use</span>
+              </div>
+              <div className="text-xs text-muted-foreground flex items-start gap-2">
+                <span className="shrink-0 mt-0.5">⚠</span>
+                <span>Only use with freshly generated wallets — never enter keys holding significant funds</span>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* 4. New Session Button */}
+      <button
+        onClick={handleNewSession}
+        className="w-full text-xs text-zinc-500 hover:text-zinc-300 transition-colors py-2"
+      >
+        ↺ New Session
+      </button>
+
+      {/* Wallet Display Section - only after generation */}
+      {(generatedWallet || vanityWallet) && (
+        <div className="border border-zinc-700 rounded-xl p-6 space-y-4 mt-6">
+          {generatedWallet && !vanityWallet && (
             <>
-              <div className="pt-2 border-t border-border text-xs text-center text-emerald-500 font-semibold">
-                Vanity Address Found!
+              <div className="text-xs text-center text-emerald-500 font-semibold pb-4 border-b border-border">
+                New Wallet Generated
               </div>
 
-              {/* Address */}
               <div className="flex flex-col gap-1">
                 <label className="text-xs text-muted-foreground uppercase tracking-widest">
                   Public Address
                 </label>
                 <div className="flex items-center gap-2">
                   <span className="font-mono text-sm text-foreground bg-card border border-border rounded-md px-3 py-2 break-all flex-1 leading-relaxed">
-                    {foundWallet.address}
+                    {generatedWallet.address}
                   </span>
-                  <CopyButton value={foundWallet.address} />
+                  <CopyButton value={generatedWallet.address} />
                 </div>
               </div>
 
-              {/* Private key */}
               <div className="flex flex-col gap-1">
                 <label className="text-xs text-muted-foreground uppercase tracking-widest">
                   Private Key
@@ -427,7 +658,7 @@ const VanityGenerator = forwardRef<VanityGeneratorHandle>(function VanityGenerat
                 <div className="flex items-center gap-2">
                   {showPrivateKey ? (
                     <span className="font-mono text-sm text-foreground bg-card border border-border rounded-md px-3 py-2 break-all flex-1 leading-relaxed">
-                      {foundWallet.privateKey}
+                      {generatedWallet.privateKey}
                     </span>
                   ) : (
                     <div
@@ -450,7 +681,7 @@ const VanityGenerator = forwardRef<VanityGeneratorHandle>(function VanityGenerat
                   >
                     {showPrivateKey ? <EyeOffIcon /> : <EyeIcon />}
                   </button>
-                  {showPrivateKey && <CopyButton value={foundWallet.privateKey} />}
+                  {showPrivateKey && <CopyButton value={generatedWallet.privateKey} />}
                 </div>
                 <p className="text-xs text-amber-500 mt-1 flex items-center gap-1">
                   <WarningIcon />
@@ -458,155 +689,24 @@ const VanityGenerator = forwardRef<VanityGeneratorHandle>(function VanityGenerat
                 </p>
               </div>
 
-              {/* QR codes */}
               <div className="flex flex-col sm:flex-row gap-4 mt-2">
-                <QRPanel label="Address QR" src={foundWallet.qrAddress} />
+                <QRPanel label="Address QR" src={generatedWallet.qrAddress} />
                 <QRPanel
                   label="Private Key QR"
-                  src={foundWallet.qrPrivateKey}
+                  src={generatedWallet.qrPrivateKey}
                   blurred={!showPrivateKey}
                   onReveal={() => setShowPrivateKey(true)}
                 />
               </div>
 
-              {/* Print button */}
               <div className="flex flex-col sm:flex-row gap-3 pt-2 w-full">
                 <button
-                  onClick={handlePrint}
+                  onClick={() => handlePrint(generatedWallet)}
                   className="flex items-center justify-center gap-2 px-4 py-2 rounded-lg border border-border text-sm text-foreground hover:bg-card transition-colors w-full sm:w-auto min-h-[44px]"
                 >
                   <PrintIcon />
                   Print / Save PDF
                 </button>
-              </div>
-
-              {/* Security Tip */}
-              <SecurityTip />
-
-              {/* Verify Wallet Section */}
-              <div className="border border-zinc-700 rounded-lg overflow-hidden">
-                <button
-                  onClick={() => setVerifyOpen(!verifyOpen)}
-                  className="w-full flex items-center justify-between py-3 px-4 bg-card border-b border-border text-left font-semibold text-sm hover:opacity-90 transition-opacity min-h-[44px]"
-                >
-                  <span className="flex items-center gap-2">
-                    <span>🔍</span>
-                    <span>Verify Wallet — Check your private key offline</span>
-                  </span>
-                  <span
-                    className="transform transition-transform"
-                    style={{ transform: verifyOpen ? "rotate(180deg)" : "rotate(0deg)" }}
-                  >
-                    ▼
-                  </span>
-                </button>
-
-                {verifyOpen && (
-                  <div className="p-4 space-y-3 bg-background">
-                    <p className="text-xs text-muted-foreground leading-relaxed">
-                      Enter your private key below to verify it matches your public address. This runs entirely in your browser — your key is never transmitted anywhere. Disconnect from the internet before entering your private key for maximum security.
-                    </p>
-
-                    {/* Warning banner */}
-                    <div className="bg-amber-900/20 border border-amber-700 rounded-md p-3 text-xs text-amber-500 flex items-start gap-2">
-                      <span className="text-base shrink-0 mt-0.5">⚠</span>
-                      <span>
-                        Never enter a private key that holds significant funds into any website — including this one. This tool is intended for freshly generated wallets only.
-                      </span>
-                    </div>
-
-                    {/* Private key input */}
-                    <div className="flex flex-col gap-2">
-                      <div className="relative">
-                        <input
-                          type={showVerifyKey ? "text" : "password"}
-                          value={verifyPrivateKey}
-                          onChange={(e) => {
-                            setVerifyPrivateKey(e.target.value);
-                            setVerifiedAddress(null);
-                            setVerifyError(null);
-                          }}
-                          placeholder="Paste your private key here (0x...)"
-                          className="w-full px-3 py-2 bg-card border border-border rounded-md text-foreground font-mono text-sm placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-accent pr-10"
-                        />
-                        <button
-                          onClick={() => setShowVerifyKey(!showVerifyKey)}
-                          className="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
-                          aria-label={showVerifyKey ? "Hide key" : "Show key"}
-                        >
-                          {showVerifyKey ? "👁" : "👁‍🗨"}
-                        </button>
-                      </div>
-                    </div>
-
-                    {/* Buttons */}
-                    <div className="flex gap-2">
-                      <button
-                        onClick={handleVerifyWallet}
-                        disabled={!verifyPrivateKey.trim()}
-                        className="flex-1 py-2 px-4 rounded-lg bg-emerald-600 text-white font-semibold text-sm transition-opacity hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed min-h-[44px] flex items-center justify-center"
-                      >
-                        Verify
-                      </button>
-                      <button
-                        onClick={handleClearVerify}
-                        className="flex-1 py-2 px-4 rounded-lg bg-zinc-700 text-white font-semibold text-sm transition-opacity hover:opacity-90 min-h-[44px] flex items-center justify-center"
-                      >
-                        Clear
-                      </button>
-                    </div>
-
-                    {/* Success result */}
-                    {verifiedAddress && (
-                      <div className="bg-emerald-950/30 border border-emerald-900/40 rounded-lg p-4 space-y-2">
-                        <div className="flex items-center gap-2 text-emerald-400 font-semibold text-sm">
-                          <span>✅</span>
-                          <span>Match confirmed</span>
-                        </div>
-                        <p className="text-xs text-emerald-300/70">Your private key correctly corresponds to this address:</p>
-                        <div className="bg-card border border-border rounded-md p-3 flex items-center justify-between gap-2">
-                          <code className="text-sm font-mono text-emerald-300 break-all">{verifiedAddress}</code>
-                          <CopyButton value={verifiedAddress} />
-                        </div>
-                      </div>
-                    )}
-
-                    {/* Error result */}
-                    {verifyError && (
-                      <div className="bg-red-950/30 border border-red-900/40 rounded-lg p-4 space-y-2">
-                        <div className="flex items-center gap-2 text-red-400 font-semibold text-sm">
-                          <span>❌</span>
-                          <span>Invalid private key</span>
-                        </div>
-                        <p className="text-xs text-red-300/70">The key you entered is not a valid Ethereum private key. Please check for typos or missing characters.</p>
-                      </div>
-                    )}
-
-                    {/* Security notices */}
-                    <div className="space-y-2 pt-2 border-t border-border">
-                      <div className="text-xs text-muted-foreground flex items-start gap-2">
-                        <span className="shrink-0 mt-0.5">🔒</span>
-                        <span>This tool runs 100% in your browser via ethers.js</span>
-                      </div>
-                      <div className="text-xs text-muted-foreground flex items-start gap-2">
-                        <span className="shrink-0 mt-0.5">🌐</span>
-                        <span>For maximum security: disconnect from the internet before use</span>
-                      </div>
-                      <div className="text-xs text-muted-foreground flex items-start gap-2">
-                        <span className="shrink-0 mt-0.5">🖨</span>
-                        <span>Use this to verify your printed paper wallet before first use</span>
-                      </div>
-                    </div>
-                  </div>
-                )}
-              </div>
-
-              {/* Transparency notice */}
-              <div className="bg-card border border-border rounded-md p-3 text-xs text-muted-foreground flex items-start gap-2">
-                <span className="text-sm shrink-0 mt-0.5">🔒</span>
-                <span>
-                  All generation happens in your browser via a Web Worker. Your CPU does the work — no data ever leaves your device.
-                </span>
               </div>
             </>
           )}
@@ -616,26 +716,8 @@ const VanityGenerator = forwardRef<VanityGeneratorHandle>(function VanityGenerat
   );
 });
 
+VanityGenerator.displayName = "VanityGenerator";
 export default VanityGenerator;
-
-/* ── Security Tip ─────────────────────────────────────────────── */
-
-function SecurityTip() {
-  return (
-    <div className="bg-emerald-950/30 border border-emerald-900/40 rounded-lg p-4 flex flex-col gap-2">
-      <div className="flex items-center gap-2">
-        <ShieldCheckIcon />
-        <span className="text-emerald-400 font-semibold text-sm">Verify Wallet Before Use</span>
-      </div>
-      <p className="text-emerald-300/70 text-xs leading-relaxed">
-        Never fund a new paper wallet without testing it first. Any error will result in the permanent loss of your assets.
-      </p>
-      <p className="text-emerald-300/70 text-xs leading-relaxed">
-        Import the private key into a wallet like MetaMask or Trust Wallet to ensure it matches the public address. Perform a test transaction by sending a small amount (e.g., 0.001 ETH) to the address. Confirm you can spend those funds before moving larger amounts into cold storage.
-      </p>
-    </div>
-  );
-}
 
 /* ── Small sub-components ─────────────────────────────────────── */
 
@@ -744,14 +826,6 @@ function WarningIcon() {
   return (
     <svg className="w-3 h-3 shrink-0" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24" aria-hidden="true">
       <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" />
-    </svg>
-  );
-}
-
-function ShieldCheckIcon() {
-  return (
-    <svg className="w-4 h-4 text-emerald-400 shrink-0" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24" aria-hidden="true">
-      <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
     </svg>
   );
 }
