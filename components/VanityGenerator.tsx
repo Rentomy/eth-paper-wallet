@@ -55,6 +55,13 @@ const VanityGenerator = forwardRef<VanityGeneratorHandle>(function VanityGenerat
   const prefixRef = useRef(prefix);
   const searchingRef = useRef(searching);
   const [error, setError] = useState("");
+  
+  // Verify Wallet state
+  const [verifyOpen, setVerifyOpen] = useState(false);
+  const [verifyPrivateKey, setVerifyPrivateKey] = useState("");
+  const [showVerifyKey, setShowVerifyKey] = useState(false);
+  const [verifiedAddress, setVerifiedAddress] = useState<string | null>(null);
+  const [verifyError, setVerifyError] = useState<string | null>(null);
 
   // Keep refs in sync with state
   useEffect(() => {
@@ -240,6 +247,29 @@ const VanityGenerator = forwardRef<VanityGeneratorHandle>(function VanityGenerat
     if (prefixLength === 5) return "minutes";
     if (prefixLength === 6) return "up to 1 hour";
     return "";
+  };
+
+  const handleVerifyWallet = () => {
+    try {
+      const wallet = new ethers.Wallet(verifyPrivateKey.trim());
+      setVerifiedAddress(wallet.address);
+      setVerifyError(null);
+    } catch (e) {
+      setVerifiedAddress(null);
+      setVerifyError("Invalid private key");
+    }
+  };
+
+  const handleClearVerify = () => {
+    setVerifyPrivateKey("");
+    setVerifiedAddress(null);
+    setVerifyError(null);
+    setShowVerifyKey(false);
+  };
+
+  const handleVerifyCollapse = () => {
+    setVerifyOpen(false);
+    handleClearVerify();
   };
 
   return (
@@ -452,6 +482,124 @@ const VanityGenerator = forwardRef<VanityGeneratorHandle>(function VanityGenerat
 
               {/* Security Tip */}
               <SecurityTip />
+
+              {/* Verify Wallet Section */}
+              <div className="border border-zinc-700 rounded-lg overflow-hidden">
+                <button
+                  onClick={() => setVerifyOpen(!verifyOpen)}
+                  className="w-full flex items-center justify-between py-3 px-4 bg-card border-b border-border text-left font-semibold text-sm hover:opacity-90 transition-opacity min-h-[44px]"
+                >
+                  <span className="flex items-center gap-2">
+                    <span>🔍</span>
+                    <span>Verify Wallet — Check your private key offline</span>
+                  </span>
+                  <span
+                    className="transform transition-transform"
+                    style={{ transform: verifyOpen ? "rotate(180deg)" : "rotate(0deg)" }}
+                  >
+                    ▼
+                  </span>
+                </button>
+
+                {verifyOpen && (
+                  <div className="p-4 space-y-3 bg-background">
+                    <p className="text-xs text-muted-foreground leading-relaxed">
+                      Enter your private key below to verify it matches your public address. This runs entirely in your browser — your key is never transmitted anywhere. Disconnect from the internet before entering your private key for maximum security.
+                    </p>
+
+                    {/* Warning banner */}
+                    <div className="bg-amber-900/20 border border-amber-700 rounded-md p-3 text-xs text-amber-500 flex items-start gap-2">
+                      <span className="text-base shrink-0 mt-0.5">⚠</span>
+                      <span>
+                        Never enter a private key that holds significant funds into any website — including this one. This tool is intended for freshly generated wallets only.
+                      </span>
+                    </div>
+
+                    {/* Private key input */}
+                    <div className="flex flex-col gap-2">
+                      <div className="relative">
+                        <input
+                          type={showVerifyKey ? "text" : "password"}
+                          value={verifyPrivateKey}
+                          onChange={(e) => {
+                            setVerifyPrivateKey(e.target.value);
+                            setVerifiedAddress(null);
+                            setVerifyError(null);
+                          }}
+                          placeholder="Paste your private key here (0x...)"
+                          className="w-full px-3 py-2 bg-card border border-border rounded-md text-foreground font-mono text-sm placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-accent pr-10"
+                        />
+                        <button
+                          onClick={() => setShowVerifyKey(!showVerifyKey)}
+                          className="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                          aria-label={showVerifyKey ? "Hide key" : "Show key"}
+                        >
+                          {showVerifyKey ? "👁" : "👁‍🗨"}
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* Buttons */}
+                    <div className="flex gap-2">
+                      <button
+                        onClick={handleVerifyWallet}
+                        disabled={!verifyPrivateKey.trim()}
+                        className="flex-1 py-2 px-4 rounded-lg bg-emerald-600 text-white font-semibold text-sm transition-opacity hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed min-h-[44px] flex items-center justify-center"
+                      >
+                        Verify
+                      </button>
+                      <button
+                        onClick={handleClearVerify}
+                        className="flex-1 py-2 px-4 rounded-lg bg-zinc-700 text-white font-semibold text-sm transition-opacity hover:opacity-90 min-h-[44px] flex items-center justify-center"
+                      >
+                        Clear
+                      </button>
+                    </div>
+
+                    {/* Success result */}
+                    {verifiedAddress && (
+                      <div className="bg-emerald-950/30 border border-emerald-900/40 rounded-lg p-4 space-y-2">
+                        <div className="flex items-center gap-2 text-emerald-400 font-semibold text-sm">
+                          <span>✅</span>
+                          <span>Match confirmed</span>
+                        </div>
+                        <p className="text-xs text-emerald-300/70">Your private key correctly corresponds to this address:</p>
+                        <div className="bg-card border border-border rounded-md p-3 flex items-center justify-between gap-2">
+                          <code className="text-sm font-mono text-emerald-300 break-all">{verifiedAddress}</code>
+                          <CopyButton value={verifiedAddress} />
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Error result */}
+                    {verifyError && (
+                      <div className="bg-red-950/30 border border-red-900/40 rounded-lg p-4 space-y-2">
+                        <div className="flex items-center gap-2 text-red-400 font-semibold text-sm">
+                          <span>❌</span>
+                          <span>Invalid private key</span>
+                        </div>
+                        <p className="text-xs text-red-300/70">The key you entered is not a valid Ethereum private key. Please check for typos or missing characters.</p>
+                      </div>
+                    )}
+
+                    {/* Security notices */}
+                    <div className="space-y-2 pt-2 border-t border-border">
+                      <div className="text-xs text-muted-foreground flex items-start gap-2">
+                        <span className="shrink-0 mt-0.5">🔒</span>
+                        <span>This tool runs 100% in your browser via ethers.js</span>
+                      </div>
+                      <div className="text-xs text-muted-foreground flex items-start gap-2">
+                        <span className="shrink-0 mt-0.5">🌐</span>
+                        <span>For maximum security: disconnect from the internet before use</span>
+                      </div>
+                      <div className="text-xs text-muted-foreground flex items-start gap-2">
+                        <span className="shrink-0 mt-0.5">🖨</span>
+                        <span>Use this to verify your printed paper wallet before first use</span>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
 
               {/* Transparency notice */}
               <div className="bg-card border border-border rounded-md p-3 text-xs text-muted-foreground flex items-start gap-2">
