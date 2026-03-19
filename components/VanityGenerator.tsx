@@ -309,6 +309,15 @@ const VanityGenerator = forwardRef<VanityGeneratorHandle>(function VanityGenerat
 
   return (
     <div className="w-full space-y-3" data-vanity>
+      {/* Generate New Wallet Button */}
+      <button
+        onClick={handleGenerateWallet}
+        disabled={isGenerating}
+        className="w-full py-3 px-6 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-zinc-950 font-semibold text-base transition-colors disabled:opacity-50 disabled:cursor-not-allowed min-h-[52px]"
+      >
+        {isGenerating ? "Generating..." : "Generate New Wallet"}
+      </button>
+
       {/* Vanity Address Accordion */}
       <div className="border border-zinc-700 rounded-xl overflow-hidden">
         <button
