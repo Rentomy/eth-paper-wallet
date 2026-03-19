@@ -185,14 +185,17 @@ const VanityGenerator = forwardRef<VanityGeneratorHandle>(function VanityGenerat
 
   const handlePrefixChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value.toLowerCase();
-    if (/^[0-9a-z]*$/.test(value) && value.length <= 6) {
+    if (value.length <= 6) {
       setPrefix(value);
-      setError("");
-    } else if (value.length <= 6) {
-      setPrefix(value.toLowerCase());
       setError("");
     }
   };
+
+  // Compute invalid characters for validation indicator
+  const invalidChars = prefix.split('').filter(c => !/^[0-9a-f]$/.test(c));
+  const uniqueInvalidChars = invalidChars.filter((c, i, arr) => arr.indexOf(c) === i);
+  const hasInvalidChars = uniqueInvalidChars.length > 0;
+  const isValidHex = prefix.length > 0 && !hasInvalidChars;
 
   const handleStartSearch = () => {
     if (!prefix) {
@@ -351,8 +354,27 @@ const VanityGenerator = forwardRef<VanityGeneratorHandle>(function VanityGenerat
                   maxLength={6}
                   disabled={searching}
                   aria-label="Vanity address prefix"
-                  className="w-full px-3 py-2 bg-card border border-border rounded-md text-foreground font-mono text-sm placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-accent disabled:opacity-50"
+                  className={`w-full px-3 py-2 bg-card border rounded-md text-foreground font-mono text-sm placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-accent disabled:opacity-50 ${hasInvalidChars ? 'border-red-800/60' : 'border-border'}`}
                 />
+                
+                {/* Validation indicator */}
+                {prefix && (
+                  <div className="flex items-center gap-2">
+                    {isValidHex ? (
+                      <p className="text-xs text-emerald-400">Valid hex prefix — ready to search</p>
+                    ) : (
+                      <p className="text-xs text-red-400">
+                        &quot;{uniqueInvalidChars.map(c => `${c}`).join('", "')}&quot; will never match — Ethereum addresses only contain 0–9 and a–f
+                      </p>
+                    )}
+                  </div>
+                )}
+                
+                {/* Static helper text */}
+                <p className="text-xs text-zinc-600 font-mono tracking-wider">
+                  Ethereum addresses only contain: 0 1 2 3 4 5 6 7 8 9 a b c d e f
+                </p>
+                
                 <div className="flex items-center justify-between">
                   <p className="text-xs text-muted-foreground">{prefix.length}/6</p>
                   {prefix && error && <p className="text-xs text-red-500">{error}</p>}
@@ -360,32 +382,14 @@ const VanityGenerator = forwardRef<VanityGeneratorHandle>(function VanityGenerat
 
                 {prefix && (
                   <>
-                    <p className="text-xs text-muted-foreground leading-relaxed">
-                      Max 6 characters · letters and numbers allowed · case-insensitive
-                    </p>
+                    <div className="bg-amber-900/20 border border-amber-700 rounded-md p-3 text-xs text-amber-500 flex items-start gap-2">
+                      <span className="text-base shrink-0 mt-0.5">⚡</span>
+                      <span>
+                        Your device's CPU will work hard during the search. Battery and performance may be affected.
+                      </span>
+                    </div>
 
-                    {!/^[0-9a-f]*$/.test(prefix) && (
-                      <div className="bg-card border border-border rounded-md p-2 text-xs text-muted-foreground flex items-start gap-2">
-                        <span className="text-sm shrink-0 mt-0.5">ℹ️</span>
-                        <span>
-                          Note: Ethereum addresses only contain 0–9 and a–f. Characters like '{(() => {
-                            const invalidChars = prefix.split('').filter(c => !/^[0-9a-f]$/.test(c));
-                            return invalidChars.filter((c, i, arr) => arr.indexOf(c) === i).slice(0, 3).join(', ');
-                          })()}' will never match.
-                        </span>
-                      </div>
-                    )}
-
-                    {prefix && (
-                      <div className="bg-amber-900/20 border border-amber-700 rounded-md p-3 text-xs text-amber-500 flex items-start gap-2">
-                        <span className="text-base shrink-0 mt-0.5">⚡</span>
-                        <span>
-                          Your device's CPU will work hard during the search. Battery and performance may be affected.
-                        </span>
-                      </div>
-                    )}
-
-                    {prefix && prefix.length > 4 && (
+                    {prefix.length > 4 && (
                       <div className="sm:hidden bg-amber-900/20 border border-amber-700 rounded-md p-3 text-xs text-amber-500 flex items-start gap-2">
                         <span className="text-base shrink-0 mt-0.5">⚠</span>
                         <span>
