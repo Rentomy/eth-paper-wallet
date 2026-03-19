@@ -67,7 +67,7 @@ export default function WalletGenerator() {
         <body>
           <div class="wallet-print">
             <h2>Ethereum Paper Wallet</h2>
-            <p class="warning">Keep this document secure. Never share your private key.</p>
+            <p class="warning">Keep this document secure. Never share or digitally store your private key.</p>
             <div class="section">
               <div class="label">Public Address</div>
               <div class="value">${wallet.address}</div>
@@ -177,8 +177,7 @@ export default function WalletGenerator() {
             </button>
           </div>
 
-          {/* Security Tip */}
-          <SecurityTip />
+          
         </>
       )}
 
@@ -197,23 +196,6 @@ export default function WalletGenerator() {
 }
 
 /* Small sub-components */
-
-function SecurityTip() {
-  return (
-    <div className="bg-emerald-950/30 border border-emerald-900/40 rounded-lg p-4 flex flex-col gap-2">
-      <div className="flex items-center gap-2">
-        <ShieldCheckIcon />
-        <span className="text-emerald-400 font-semibold text-sm">Verify Wallet Before Use</span>
-      </div>
-      <p className="text-emerald-300/70 text-xs leading-relaxed">
-        Never fund a new paper wallet without testing it first. Any error will result in the permanent loss of your assets.
-      </p>
-      <p className="text-emerald-300/70 text-xs leading-relaxed">
-        Import the private key into a wallet like MetaMask or Trust Wallet to ensure it matches the public address. Perform a test transaction by sending a small amount (e.g., 0.001 ETH) to the address. Confirm you can spend those funds before moving larger amounts into cold storage.
-      </p>
-    </div>
-  );
-}
 
 function CopyButton({ value, label = "Copy to clipboard" }: { value: string; label?: string }) {
   const [copied, setCopied] = useState(false);
@@ -323,10 +305,4 @@ function WarningIcon() {
   );
 }
 
-function ShieldCheckIcon() {
-  return (
-    <svg className="w-4 h-4 text-emerald-400 shrink-0" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24" aria-hidden="true">
-      <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
-    </svg>
-  );
-}
+

@@ -47,11 +47,11 @@ export function InstallPrompt() {
               📲
             </span>
             <span className="text-sm font-semibold text-foreground">
-              Install emitkey for offline use
+              Install emitkey
             </span>
           </div>
           <p className="text-xs text-muted-foreground">
-            Generate wallets anytime — no internet required after install.
+            Add to your home screen for instant offline access.
           </p>
         </div>
         <div className="flex items-center gap-2">
@@ -100,8 +100,7 @@ export function OfflineIndicator() {
       <span role="img" aria-label="Secure" className="mr-1">
         🔒
       </span>
-      You are offline — emitkey is fully operational. This is the most secure
-      mode for wallet generation.
+      Offline mode active — maximum security for wallet generation.
     </div>
   );
 }

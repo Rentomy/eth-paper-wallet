@@ -23,8 +23,7 @@ export default function Home() {
             Ethereum Paper Wallet Generator
           </h1>
           <p className="text-sm text-muted-foreground leading-relaxed text-pretty break-words">
-            100% client-side. Nothing is transmitted or stored. Your keys are
-            generated and stay entirely within your browser.
+            100% local · open source · works offline
           </p>
         </header>
 

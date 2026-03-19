@@ -242,7 +242,7 @@ const VanityGenerator = forwardRef<VanityGeneratorHandle>(function VanityGenerat
         <body>
           <div class="wallet-print">
             <h2>Vanity Wallet</h2>
-            <p class="warning">Keep this document secure. Never share your private key.</p>
+            <p class="warning">Keep this document secure. Never share or digitally store your private key.</p>
             <div class="section">
               <div class="label">Public Address</div>
               <div class="value">${wallet.address}</div>
@@ -380,7 +380,7 @@ const VanityGenerator = forwardRef<VanityGeneratorHandle>(function VanityGenerat
                       <div className="bg-amber-900/20 border border-amber-700 rounded-md p-3 text-xs text-amber-500 flex items-start gap-2">
                         <span className="text-base shrink-0 mt-0.5">⚡</span>
                         <span>
-                          Your device's CPU will work hard during the search. This is 100% local — nothing is sent to any server.
+                          Your device's CPU will work hard during the search. Battery and performance may be affected.
                         </span>
                       </div>
                     )}
@@ -389,7 +389,7 @@ const VanityGenerator = forwardRef<VanityGeneratorHandle>(function VanityGenerat
                       <div className="sm:hidden bg-amber-900/20 border border-amber-700 rounded-md p-3 text-xs text-amber-500 flex items-start gap-2">
                         <span className="text-base shrink-0 mt-0.5">⚠</span>
                         <span>
-                          On mobile devices, battery and performance may be affected. We recommend using a desktop for prefixes longer than 4 characters.
+                          We recommend using a desktop for prefixes longer than 4 characters.
                         </span>
                       </div>
                     )}
@@ -424,12 +424,7 @@ const VanityGenerator = forwardRef<VanityGeneratorHandle>(function VanityGenerat
                   </div>
                 )}
 
-                <div className="bg-card border border-border rounded-md p-3 text-xs text-muted-foreground flex items-start gap-2">
-                  <span className="text-sm shrink-0 mt-0.5">🔒</span>
-                  <span>
-                    All generation happens in your browser via a Web Worker. Your CPU does the work — no data ever leaves your device.
-                  </span>
-                </div>
+                
               </>
             )}
 
@@ -535,7 +530,7 @@ const VanityGenerator = forwardRef<VanityGeneratorHandle>(function VanityGenerat
         {verifyOpen && (
           <div className="p-6 space-y-4 bg-background border-t border-zinc-700">
             <p className="text-xs text-muted-foreground leading-relaxed">
-              Enter your private key below to verify it matches your public address. This runs entirely in your browser — your key is never transmitted anywhere.
+              Enter your private key below to verify it matches your public address. For maximum security: install emitkey as an app (📲 banner below) and disconnect from the internet before verifying.
             </p>
 
             <div className="bg-amber-900/20 border border-amber-700 rounded-md p-3 text-xs text-amber-500 flex items-start gap-2">
@@ -609,18 +604,10 @@ const VanityGenerator = forwardRef<VanityGeneratorHandle>(function VanityGenerat
               </div>
             )}
 
-            <div className="space-y-2 pt-2 border-t border-border">
+            <div className="pt-2 border-t border-border">
               <div className="text-xs text-muted-foreground flex items-start gap-2">
-                <span className="shrink-0 mt-0.5">🔒</span>
-                <span>Runs 100% locally via ethers.js — nothing is transmitted</span>
-              </div>
-              <div className="text-xs text-muted-foreground flex items-start gap-2">
-                <span className="shrink-0 mt-0.5">🌐</span>
-                <span>For maximum security: disconnect from internet before use</span>
-              </div>
-              <div className="text-xs text-muted-foreground flex items-start gap-2">
-                <span className="shrink-0 mt-0.5">⚠</span>
-                <span>Only use with freshly generated wallets — never enter keys holding significant funds</span>
+                <span className="shrink-0 mt-0.5">✅</span>
+                <span>Always verify your wallet before storing funds</span>
               </div>
             </div>
           </div>
