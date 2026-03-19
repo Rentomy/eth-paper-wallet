@@ -1,5 +1,6 @@
 import dynamic from "next/dynamic";
 import Footer from "@/components/Footer";
+import { InstallPrompt, OfflineIndicator } from "@/components/PWAComponents";
 
 // Dynamically import client component to avoid hydration issues
 const WalletGenerator = dynamic(
@@ -9,6 +10,8 @@ const WalletGenerator = dynamic(
 export default function Home() {
   return (
     <div className="min-h-screen flex flex-col">
+      <OfflineIndicator />
+      <InstallPrompt />
       <main className="flex-1 flex flex-col items-center px-4 py-12">
         {/* Header */}
         <header className="w-full max-w-2xl mb-10 text-center">
