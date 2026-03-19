@@ -309,16 +309,7 @@ const VanityGenerator = forwardRef<VanityGeneratorHandle>(function VanityGenerat
 
   return (
     <div className="w-full space-y-3" data-vanity>
-      {/* 1. Generate New Wallet Button */}
-      <button
-        onClick={handleGenerateWallet}
-        disabled={isGenerating}
-        className="w-full py-3 px-6 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-zinc-950 font-semibold text-base transition-colors disabled:opacity-50 disabled:cursor-not-allowed min-h-[52px]"
-      >
-        {isGenerating ? "Generating..." : "Generate New Wallet"}
-      </button>
-
-      {/* 2. Vanity Address Accordion */}
+      {/* Vanity Address Accordion */}
       <div className="border border-zinc-700 rounded-xl overflow-hidden">
         <button
           onClick={() => setVanityOpen(!vanityOpen)}
@@ -621,14 +612,6 @@ const VanityGenerator = forwardRef<VanityGeneratorHandle>(function VanityGenerat
           </div>
         )}
       </div>
-
-      {/* 4. New Session Button */}
-      <button
-        onClick={handleNewSession}
-        className="w-full text-xs text-zinc-500 hover:text-zinc-300 transition-colors py-2"
-      >
-        ↺ New Session
-      </button>
 
       {/* Wallet Display Section - only after generation */}
       {(generatedWallet || vanityWallet) && (
