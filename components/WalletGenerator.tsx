@@ -7,6 +7,7 @@ import VanityGenerator, { type VanityGeneratorHandle } from "./VanityGenerator";
 import type { Wallet } from "@/types/wallet";
 
 export default function WalletGenerator() {
+  const [showOnboarding, setShowOnboarding] = useState(true);
   const [wallet, setWallet] = useState<Wallet | null>(null);
   const [generating, setGenerating] = useState(false);
   const [showPrivateKey, setShowPrivateKey] = useState(false);
@@ -95,6 +96,58 @@ export default function WalletGenerator() {
     printWindow.print();
     printWindow.close();
   };
+
+  if (showOnboarding) {
+    return (
+      <div className="flex flex-col gap-6">
+        <div className="bg-zinc-900 border border-zinc-700 rounded-xl p-6">
+          <h2 className="text-lg font-semibold text-foreground mb-4 flex items-center gap-2">
+            <span>🔒</span> For maximum security — follow these 3 steps:
+          </h2>
+          
+          <div className="flex flex-col gap-4 mb-6">
+            {/* Step 1 - Done */}
+            <div className="flex items-start gap-3 text-zinc-500">
+              <span className="text-lg">✅</span>
+              <div>
+                <p className="font-medium">Page loaded — you are here</p>
+              </div>
+            </div>
+            
+            {/* Step 2 - Action needed */}
+            <div className="flex items-start gap-3 text-amber-500">
+              <span className="text-lg animate-pulse">📵</span>
+              <div>
+                <p className="font-medium">Disconnect from the internet (airplane mode or WiFi off)</p>
+              </div>
+            </div>
+            
+            {/* Step 3 - Upcoming */}
+            <div className="flex items-start gap-3 text-zinc-500">
+              <span className="text-lg">🔑</span>
+              <div>
+                <p className="font-medium">Generate your wallet</p>
+              </div>
+            </div>
+          </div>
+          
+          <button
+            onClick={() => setShowOnboarding(false)}
+            className="w-full py-3 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-semibold text-sm transition-colors min-h-[44px]"
+          >
+            I'm offline — Generate Wallet
+          </button>
+          
+          <button
+            onClick={() => setShowOnboarding(false)}
+            className="w-full mt-3 text-xs text-zinc-500 hover:text-zinc-400 transition-colors"
+          >
+            Skip — I understand the risks
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col gap-6">
