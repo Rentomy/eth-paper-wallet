@@ -16,7 +16,7 @@ const jetbrainsMono = JetBrains_Mono({
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://emitkey.app"),
-  title: "ETH Paper Wallet Generator — emitkey.app",
+  title: "ETH Paper Wallet Generator — emitkey.com",
   description: "Generate a secure Ethereum paper wallet 100% in your browser. No server, no tracking, no data transmission. Your private key never leaves your device.",
   keywords: [
     "ethereum paper wallet",
@@ -28,7 +28,7 @@ export const metadata: Metadata = {
     "offline eth wallet",
     "secure ethereum wallet"
   ],
-  authors: [{ name: "emitkey", url: "https://emitkey.app" }],
+  authors: [{ name: "emitkey", url: "https://emitkey.com" }],
   icons: {
     icon: [
       { url: "/favicon.ico", sizes: "any" },
@@ -47,7 +47,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "ETH Paper Wallet Generator — emitkey.app",
+    title: "ETH Paper Wallet Generator — emitkey.com",
     description: "100% client-side ETH paper wallet generator. No server, no tracking. Open source.",
   },
   robots: {
@@ -56,7 +56,7 @@ export const metadata: Metadata = {
     googleBot: { index: true, follow: true },
   },
   alternates: {
-    canonical: "https://emitkey.app",
+    canonical: "https://emitkey.com",
   },
 };
 
