@@ -7,8 +7,7 @@ export default function Footer() {
         <div className="flex items-start gap-2 text-xs text-muted-foreground justify-center flex-wrap">
           <ShieldCheckIcon className="w-4 h-4 text-accent shrink-0 mt-0.5" />
           <p>
-            All wallet generation happens locally in your browser.
-            Your private key never leaves your device.
+            All wallet generation happens locally in your browser.<br />Your private key never leaves your device.
           </p>
         </div>
 
