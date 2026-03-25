@@ -7,9 +7,10 @@ export default function Footer() {
         <div className="flex items-center gap-1 flex-wrap justify-center">
           <a
             href="/how-it-works"
-            className="text-xs text-zinc-500 hover:text-zinc-300 transition-colors duration-150 min-h-[44px]"
+            className="inline-flex items-center gap-2 text-xs text-accent hover:text-accent/80 transition-colors duration-150 font-medium min-h-[44px] min-w-[44px]"
           >
-            How it works
+            <ShieldIcon className="w-4 h-4 shrink-0" />
+            <span>How it works</span>
           </a>
           <span className="text-zinc-700 px-1">·</span>
           <a
@@ -44,6 +45,25 @@ export default function Footer() {
 
       </div>
     </footer>
+  );
+}
+
+/* Inline SVG — shield */
+function ShieldIcon({ className }: { className?: string }) {
+  return (
+    <svg
+      className={className}
+      xmlns="http://www.w3.org/2000/svg"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={2}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
+      <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+    </svg>
   );
 }
 
