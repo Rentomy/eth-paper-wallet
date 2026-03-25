@@ -362,18 +362,24 @@ export default function BatchGenerator() {
                 </button>
               </div>
 
-              {/* New Batch Button */}
+            </>
+          )}
+
+          {/* New Session — always visible once batch panel is open */}
+          {wallets.length > 0 && (
+            <div className="flex justify-center pt-2">
               <button
                 onClick={() => {
                   setWallets([]);
                   setRevealedKeys(new Set());
                   setError("");
                 }}
-                className="w-full py-2 px-4 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-white font-semibold text-sm transition-colors min-h-[44px]"
+                aria-label="Start a new batch session"
+                className="px-6 py-2 rounded-lg bg-zinc-700 hover:bg-zinc-600 text-white font-semibold text-sm transition-colors min-h-[44px]"
               >
-                ↺ Generate New Batch
+                ↺ New Session
               </button>
-            </>
+            </div>
           )}
         </div>
       )}
