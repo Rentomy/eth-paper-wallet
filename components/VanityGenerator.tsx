@@ -543,7 +543,7 @@ const VanityGenerator = forwardRef<VanityGeneratorHandle>(function VanityGenerat
         {verifyOpen && (
           <div className="p-6 space-y-4 bg-background border-t border-zinc-700">
             <p className="text-xs text-muted-foreground leading-relaxed">
-              Enter your private key below to verify it matches your public address.
+              Enter the private key you just generated below to verify that it matches your public address.
             </p>
 
             <div className="bg-amber-900/20 border border-amber-700 rounded-md p-3 text-xs text-amber-500 flex items-start gap-2">
