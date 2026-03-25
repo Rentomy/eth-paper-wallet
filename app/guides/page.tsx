@@ -48,6 +48,14 @@ export default function GuidesPage() {
           </p>
         </header>
 
+        {/* Security statement */}
+        <div className="w-full max-w-2xl mb-10 flex items-start gap-3 bg-zinc-900 border border-zinc-800 rounded-xl p-4">
+          <ShieldCheckIcon className="w-4 h-4 text-accent shrink-0 mt-0.5" />
+          <p className="text-xs text-zinc-300 leading-relaxed">
+            All wallet generation happens locally in your browser. Your private key never leaves your device.
+          </p>
+        </div>
+
         {/* Notice */}
         <div className="w-full max-w-2xl mb-10 bg-zinc-900 border border-zinc-800 rounded-xl p-4">
           <p className="text-xs text-zinc-400 leading-relaxed flex items-start gap-2">
