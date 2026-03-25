@@ -11,16 +11,25 @@ export default function Footer() {
           </p>
         </div>
 
-        {/* GitHub link */}
-        <a
-          href="https://github.com/Rentomy/eth-paper-wallet"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="inline-flex items-center gap-2 text-xs text-emerald-400 hover:text-emerald-300 transition-colors duration-150 min-h-[44px] min-w-[44px]"
-        >
-          <GitHubIcon className="w-4 h-4 shrink-0" />
-          <span>View source code on GitHub</span>
-        </a>
+        {/* Links */}
+        <div className="flex items-center gap-3 flex-wrap justify-center">
+          <a
+            href="/guides"
+            className="text-xs text-zinc-500 hover:text-zinc-300 transition-colors"
+          >
+            Guides
+          </a>
+          <span className="text-zinc-700">·</span>
+          <a
+            href="https://github.com/Rentomy/eth-paper-wallet"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-2 text-xs text-emerald-400 hover:text-emerald-300 transition-colors duration-150 min-h-[44px] min-w-[44px]"
+          >
+            <GitHubIcon className="w-4 h-4 shrink-0" />
+            <span>Source</span>
+          </a>
+        </div>
 
         {/* Tagline */}
         <p className="text-xs text-muted-foreground tracking-wide flex flex-wrap justify-center gap-1">
