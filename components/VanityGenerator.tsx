@@ -10,6 +10,7 @@ import {
 } from "react";
 import { ethers } from "ethers";
 import { generateQR, copyToClipboard } from "@/lib/utils";
+import BatchGenerator from "./BatchGenerator";
 import type { Wallet } from "@/types/wallet";
 
 // Worker code defined outside component to prevent recreation on each render
@@ -323,6 +324,9 @@ const VanityGenerator = forwardRef<VanityGeneratorHandle>(function VanityGenerat
       >
         {isGenerating ? "Generating..." : "Generate New Wallet"}
       </button>
+
+      {/* Batch Generator Accordion */}
+      <BatchGenerator />
 
       {/* Vanity Address Accordion */}
       <div className="border border-zinc-700 rounded-xl overflow-hidden">
