@@ -1,7 +1,7 @@
 {
-  "name": "emitkey — ETH Paper Wallet Generator",
+  "name": "emitkey",
   "short_name": "emitkey",
-  "description": "Generate secure Ethereum paper wallets 100% offline in your browser",
+  "description": "ETH paper wallet generator. Open source, offline, secure.",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#09090b",

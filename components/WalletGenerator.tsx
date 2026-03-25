@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback, useRef } from "react";
+import { useState, useCallback, useRef, useEffect } from "react";
 import { ethers } from "ethers";
 import { generateQR, copyToClipboard } from "@/lib/utils";
 import VanityGenerator, { type VanityGeneratorHandle } from "./VanityGenerator";
@@ -11,7 +11,20 @@ export default function WalletGenerator() {
   const [wallet, setWallet] = useState<Wallet | null>(null);
   const [generating, setGenerating] = useState(false);
   const [showPrivateKey, setShowPrivateKey] = useState(false);
+  const [isOnline, setIsOnline] = useState(true);
+  const [showOnlineError, setShowOnlineError] = useState(false);
   const vanityRef = useRef<VanityGeneratorHandle>(null);
+
+  // Real-time online/offline listener
+  useEffect(() => {
+    const update = () => setIsOnline(navigator.onLine);
+    window.addEventListener("online", update);
+    window.addEventListener("offline", update);
+    return () => {
+      window.removeEventListener("online", update);
+      window.removeEventListener("offline", update);
+    };
+  }, []);
 
   const handleReset = useCallback(() => {
     setWallet(null);
@@ -97,6 +110,15 @@ export default function WalletGenerator() {
     printWindow.close();
   };
 
+  const handleOfflineGenerate = () => {
+    if (navigator.onLine) {
+      setShowOnlineError(true);
+      setTimeout(() => setShowOnlineError(false), 3000);
+      return;
+    }
+    setShowOnboarding(false);
+  };
+
   if (showOnboarding) {
     return (
       <div className="flex flex-col gap-6">
@@ -107,36 +129,43 @@ export default function WalletGenerator() {
           
           <div className="flex flex-col gap-4 mb-6">
             {/* Step 1 - Done */}
-            <div className="flex items-start gap-3 text-zinc-500">
+            <div className="flex items-start gap-3 text-emerald-500">
               <span className="text-lg">✅</span>
               <div>
                 <p className="font-medium">Page loaded — you are here</p>
               </div>
             </div>
             
-            {/* Step 2 - Action needed */}
-            <div className="flex items-start gap-3 text-amber-500">
-              <span className="text-lg animate-pulse">📵</span>
+            {/* Step 2 - Action needed or completed */}
+            <div className={`flex items-start gap-3 ${isOnline ? "text-amber-500" : "text-emerald-500"}`}>
+              <span className={`text-lg ${isOnline ? "animate-pulse" : ""}`}>{isOnline ? "📵" : "✅"}</span>
               <div>
                 <p className="font-medium">Disconnect from the internet (airplane mode or WiFi off)</p>
               </div>
             </div>
             
             {/* Step 3 - Upcoming */}
-            <div className="flex items-start gap-3 text-zinc-500">
-              <span className="text-lg">🔑</span>
+            <div className={`flex items-start gap-3 ${isOnline ? "text-zinc-500" : "text-emerald-500"}`}>
+              <span className="text-lg">{isOnline ? "🔑" : "✅"}</span>
               <div>
                 <p className="font-medium">Generate your wallet</p>
               </div>
             </div>
           </div>
           
-          <button
-            onClick={() => setShowOnboarding(false)}
-            className="w-full py-3 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-semibold text-sm transition-colors min-h-[44px]"
-          >
-            I'm offline — Generate Wallet
-          </button>
+          {showOnlineError ? (
+            <div className="w-full py-3 px-4 rounded-lg bg-red-950/50 border border-red-900/40 text-red-400 text-sm text-center leading-relaxed">
+              <p className="font-semibold">You are still connected to the internet.</p>
+              <p className="text-xs mt-1 text-red-400/80">Enable airplane mode or turn off WiFi, then try again.</p>
+            </div>
+          ) : (
+            <button
+              onClick={handleOfflineGenerate}
+              className="w-full py-3 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-semibold text-sm transition-colors min-h-[44px]"
+            >
+              I'm offline — Generate Wallet
+            </button>
+          )}
           
           <button
             onClick={() => setShowOnboarding(false)}

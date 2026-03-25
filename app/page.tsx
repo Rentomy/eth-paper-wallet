@@ -20,15 +20,15 @@ export default function Home() {
             Ethereum Paper Wallet
           </div>
           <h1 className="text-3xl font-bold text-foreground text-balance leading-tight mb-3">
-            Ethereum Paper Wallet Generator
+            Paper Wallet Generator
           </h1>
           <p className="text-sm text-muted-foreground leading-relaxed text-pretty break-words">
-            100% local · open source · works offline
+            Offline · Open source · Secure
           </p>
         </header>
 
         {/* Card */}
-        <div className="w-full max-w-2xl bg-card border border-border rounded-xl p-6 shadow-lg shadow-black/40">
+        <div className="w-full max-w-2xl bg-card border border-border rounded-xl p-4 sm:p-6 shadow-lg shadow-black/40">
           <WalletGenerator />
         </div>
       </main>

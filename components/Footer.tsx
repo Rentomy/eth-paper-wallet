@@ -1,35 +1,37 @@
 export default function Footer() {
   return (
-    <footer className="border-t border-border mt-12 py-8 px-4">
+    <footer className="py-8 px-4">
       <div className="max-w-2xl mx-auto flex flex-col items-center gap-4 text-center">
 
-        {/* Security statement */}
-        <div className="flex items-start gap-2 text-xs text-muted-foreground justify-center flex-wrap">
-          <ShieldCheckIcon className="w-4 h-4 text-accent shrink-0 mt-0.5" />
-          <p>
-            All wallet generation happens locally in your browser.<br />Your private key never leaves your device.
-          </p>
+        {/* Links as menu items */}
+        <div className="flex items-center gap-1 flex-wrap justify-center">
+          <a
+            href="/guides"
+            className="inline-flex items-center gap-2 text-xs text-accent hover:text-accent/80 transition-colors duration-150 font-medium min-h-[44px] min-w-[44px]"
+          >
+            <BookOpenIcon className="w-4 h-4 shrink-0" />
+            <span>Guides</span>
+          </a>
+          <span className="text-zinc-700 px-1">|</span>
+          <a
+            href="https://github.com/Rentomy/eth-paper-wallet"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-2 text-xs text-emerald-400 hover:text-emerald-300 transition-colors duration-150 min-h-[44px] min-w-[44px]"
+          >
+            <GitHubIcon className="w-4 h-4 shrink-0" />
+            <span>Source</span>
+          </a>
         </div>
 
-        {/* GitHub link */}
-        <a
-          href="https://github.com/Rentomy/eth-paper-wallet"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="inline-flex items-center gap-2 text-xs text-emerald-400 hover:text-emerald-300 transition-colors duration-150 min-h-[44px] min-w-[44px]"
-        >
-          <GitHubIcon className="w-4 h-4 shrink-0" />
-          <span>View source code on GitHub</span>
-        </a>
-
         {/* Tagline */}
-        <p className="text-xs text-muted-foreground tracking-wide flex flex-wrap justify-center gap-1">
+        <p className="text-xs text-muted-foreground tracking-wide flex flex-wrap justify-center gap-x-2 gap-y-0.5">
           <span>Open source</span>
-          <span className="hidden sm:inline">&middot;</span>
+          <span aria-hidden="true">&middot;</span>
           <span>Auditable</span>
-          <span className="hidden sm:inline">&middot;</span>
+          <span aria-hidden="true">&middot;</span>
           <span>No server</span>
-          <span className="hidden sm:inline">&middot;</span>
+          <span aria-hidden="true">&middot;</span>
           <span>No tracking</span>
         </p>
 
@@ -38,8 +40,8 @@ export default function Footer() {
   );
 }
 
-/* Inline SVG — shield with checkmark */
-function ShieldCheckIcon({ className }: { className?: string }) {
+/* Inline SVG — book open */
+function BookOpenIcon({ className }: { className?: string }) {
   return (
     <svg
       className={className}
@@ -52,8 +54,7 @@ function ShieldCheckIcon({ className }: { className?: string }) {
       strokeLinejoin="round"
       aria-hidden="true"
     >
-      <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
-      <polyline points="9 12 11 14 15 10" />
+      <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2zM22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z" />
     </svg>
   );
 }
