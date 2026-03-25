@@ -115,9 +115,9 @@ function Section({
   return (
     <div className="space-y-4">
       <div>
-        <h2 className="text-2xl font-bold text-white text-balance">{title}</h2>
+        <h2 className="text-lg font-semibold text-white">{title}</h2>
         {subtitle && (
-          <p className="text-sm text-zinc-400 mt-2">{subtitle}</p>
+          <p className="text-xs text-zinc-500 mt-2">{subtitle}</p>
         )}
       </div>
       {children}
@@ -129,11 +129,11 @@ function BoxBg({ type, children }: { type: "success" | "warning" | "info"; child
   const styles: Record<typeof type, string> = {
     success: "bg-emerald-950/30 border border-emerald-900/40 text-emerald-300",
     warning: "bg-amber-950/30 border border-amber-900/40 text-amber-300",
-    info: "bg-zinc-800/50 border border-zinc-700 text-zinc-300",
+    info: "bg-zinc-900 border border-zinc-800 text-zinc-300",
   };
 
   return (
-    <div className={`p-4 rounded-xl text-xs leading-relaxed space-y-2 ${styles[type]}`}>
+    <div className={`p-5 sm:p-6 rounded-xl text-xs leading-relaxed space-y-2 ${styles[type]}`}>
       {children}
     </div>
   );
@@ -420,7 +420,7 @@ export default function HowItWorksPage() {
         <div className="w-full max-w-2xl mb-10 flex flex-col sm:flex-row justify-center">
           <a
             href="/"
-            className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-emerald-600 hover:bg-emerald-500 text-white text-sm font-semibold rounded-xl transition-colors duration-150 min-h-[44px]"
+            className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-emerald-500 hover:bg-emerald-400 text-zinc-950 font-semibold text-base rounded-xl transition-colors duration-150 min-h-[52px] w-full"
           >
             → Generate your wallet on emitkey.com
           </a>

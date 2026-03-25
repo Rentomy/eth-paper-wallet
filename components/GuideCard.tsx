@@ -154,7 +154,7 @@ export default function GuideCard({
           {/* Download PDF Button */}
           <button
             onClick={handlePrintGuide}
-            className="w-full mt-6 py-2 rounded-lg border border-zinc-700 text-zinc-300 hover:text-white hover:border-zinc-600 hover:bg-zinc-800/50 font-semibold text-sm transition-colors min-h-[44px]"
+            className="w-full mt-6 py-3 rounded-xl border border-zinc-700 text-white hover:bg-zinc-800 font-semibold text-base transition-colors min-h-[52px]"
           >
             📄 Download Guide as PDF
           </button>

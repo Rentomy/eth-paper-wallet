@@ -46,8 +46,8 @@ function GuidesContent({ icon, text }: { icon?: string; text: string }) {
 
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
-    <div className="space-y-2">
-      <h4 className="font-semibold text-white text-sm uppercase tracking-wide">{title}</h4>
+    <div className="space-y-3">
+      <h4 className="font-semibold text-white text-lg">{title}</h4>
       {children}
     </div>
   );
@@ -55,17 +55,17 @@ function Section({ title, children }: { title: string; children: React.ReactNode
 
 function BoxBg({ type, children }: { type: "remember" | "why-works" | "extra-security" | "key-principles" | "important" | "warning" | "best-practice"; children: React.ReactNode }) {
   const styles: Record<typeof type, string> = {
-    remember: "bg-amber-950/30 border-l-4 border-amber-600",
-    "why-works": "bg-emerald-950/30 border-l-4 border-emerald-600",
-    "extra-security": "bg-zinc-800/50 border-l-4 border-zinc-600",
-    "key-principles": "bg-emerald-950/30 border-l-4 border-emerald-600",
-    important: "bg-amber-950/30 border-l-4 border-amber-600",
-    warning: "bg-amber-950/30 border border-amber-900/40",
-    "best-practice": "bg-emerald-950/30 border border-emerald-900/40",
+    remember: "bg-amber-950/30 border border-amber-900/40 text-amber-300",
+    "why-works": "bg-emerald-950/30 border border-emerald-900/40 text-emerald-300",
+    "extra-security": "bg-zinc-900 border border-zinc-800 text-zinc-300",
+    "key-principles": "bg-emerald-950/30 border border-emerald-900/40 text-emerald-300",
+    important: "bg-amber-950/30 border border-amber-900/40 text-amber-300",
+    warning: "bg-amber-950/30 border border-amber-900/40 text-amber-300",
+    "best-practice": "bg-emerald-950/30 border border-emerald-900/40 text-emerald-300",
   };
   
   return (
-    <div className={`p-4 rounded text-xs leading-relaxed space-y-2 ${styles[type]}`}>
+    <div className={`p-5 sm:p-6 rounded-xl text-xs leading-relaxed space-y-2 ${styles[type]}`}>
       {children}
     </div>
   );
@@ -75,7 +75,7 @@ function CollapsibleWarning({ title, children, defaultOpen = true }: { title: st
   const [isOpen, setIsOpen] = useState(defaultOpen);
   
   return (
-    <div className="space-y-2">
+    <div className="space-y-3">
       <button
         onClick={() => setIsOpen(!isOpen)}
         className="flex items-center gap-2 text-xs font-semibold text-amber-300 hover:text-amber-200 transition-colors"
