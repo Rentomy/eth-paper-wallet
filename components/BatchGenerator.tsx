@@ -66,6 +66,13 @@ export default function BatchGenerator() {
     generateBatch(quantity);
   };
 
+  const handleReset = useCallback(() => {
+    setWallets([]);
+    setRevealedKeys(new Set());
+    setError("");
+    setProgress(0);
+  }, []);
+
   const toggleRevealAll = () => {
     if (revealedKeys.size === wallets.length) {
       setRevealedKeys(new Set());
@@ -365,15 +372,11 @@ export default function BatchGenerator() {
             </>
           )}
 
-          {/* New Session — always visible once batch panel is open */}
+          {/* New Session — mirrors WalletGenerator: always rendered, visible only after generation */}
           {wallets.length > 0 && (
-            <div className="flex justify-center pt-2">
+            <div className="flex justify-center pt-4">
               <button
-                onClick={() => {
-                  setWallets([]);
-                  setRevealedKeys(new Set());
-                  setError("");
-                }}
+                onClick={handleReset}
                 aria-label="Start a new batch session"
                 className="px-6 py-2 rounded-lg bg-zinc-700 hover:bg-zinc-600 text-white font-semibold text-sm transition-colors min-h-[44px]"
               >
