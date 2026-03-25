@@ -10,7 +10,7 @@ import {
 } from "react";
 import { ethers } from "ethers";
 import { generateQR, copyToClipboard } from "@/lib/utils";
-import BatchGenerator from "./BatchGenerator";
+import BatchGenerator, { type BatchGeneratorHandle } from "./BatchGenerator";
 import type { Wallet } from "@/types/wallet";
 
 // Worker code defined outside component to prevent recreation on each render
@@ -67,6 +67,9 @@ const VanityGenerator = forwardRef<VanityGeneratorHandle>(function VanityGenerat
   const [showVerifyKey, setShowVerifyKey] = useState(false);
   const [verifiedAddress, setVerifiedAddress] = useState<string | null>(null);
   const [verifyError, setVerifyError] = useState<string | null>(null);
+
+  // Batch Generator ref
+  const batchRef = useRef<BatchGeneratorHandle>(null);
 
   // Keep refs in sync with state
   useEffect(() => {
@@ -143,6 +146,8 @@ const VanityGenerator = forwardRef<VanityGeneratorHandle>(function VanityGenerat
       setVerifyError(null);
       setShowVerifyKey(false);
       setVerifyOpen(false);
+      // Also reset Batch Generator
+      batchRef.current?.reset();
     },
   }), [createWorker]);
 
@@ -326,7 +331,7 @@ const VanityGenerator = forwardRef<VanityGeneratorHandle>(function VanityGenerat
       </button>
 
       {/* Batch Generator Accordion */}
-      <BatchGenerator />
+      <BatchGenerator ref={batchRef} />
 
       {/* Vanity Address Accordion */}
       <div className="border border-zinc-700 rounded-xl overflow-hidden">

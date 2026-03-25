@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, forwardRef, useImperativeHandle } from "react";
 import { ethers } from "ethers";
 import { generateQR, copyToClipboard } from "@/lib/utils";
 import type { Wallet } from "@/types/wallet";
@@ -11,7 +11,11 @@ interface BatchWallet {
   privateKey: string;
 }
 
-export default function BatchGenerator() {
+export interface BatchGeneratorHandle {
+  reset: () => void;
+}
+
+const BatchGenerator = forwardRef<BatchGeneratorHandle>(function BatchGenerator(_props, ref) {
   const [batchOpen, setBatchOpen] = useState(false);
   const [quantity, setQuantity] = useState(10);
   const [generating, setGenerating] = useState(false);
@@ -19,6 +23,18 @@ export default function BatchGenerator() {
   const [wallets, setWallets] = useState<BatchWallet[]>([]);
   const [revealedKeys, setRevealedKeys] = useState<Set<number>>(new Set());
   const [error, setError] = useState("");
+
+  useImperativeHandle(ref, () => ({
+    reset() {
+      setWallets([]);
+      setRevealedKeys(new Set());
+      setError("");
+      setProgress(0);
+      setBatchOpen(false);
+      setQuantity(10);
+      setGenerating(false);
+    },
+  }), []);
 
   const PRESET_QUANTITIES = [5, 10, 25, 50, 100];
 
@@ -374,21 +390,10 @@ export default function BatchGenerator() {
 
             </>
           )}
-
-          {/* New Session — mirrors WalletGenerator: always rendered, visible only after generation */}
-          {wallets.length > 0 && (
-            <div className="flex justify-center pt-4">
-              <button
-                onClick={handleReset}
-                aria-label="Start a new batch session"
-                className="px-6 py-2 rounded-lg bg-zinc-700 hover:bg-zinc-600 text-white font-semibold text-sm transition-colors min-h-[44px]"
-              >
-                ↺ New Session
-              </button>
-            </div>
-          )}
         </div>
       )}
     </div>
   );
-}
+});
+
+export default BatchGenerator;
