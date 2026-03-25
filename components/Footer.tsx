@@ -6,6 +6,13 @@ export default function Footer() {
         {/* Links as menu items */}
         <div className="flex items-center gap-1 flex-wrap justify-center">
           <a
+            href="/how-it-works"
+            className="text-xs text-zinc-500 hover:text-zinc-300 transition-colors duration-150 min-h-[44px]"
+          >
+            How it works
+          </a>
+          <span className="text-zinc-700 px-1">·</span>
+          <a
             href="/guides"
             className="inline-flex items-center gap-2 text-xs text-accent hover:text-accent/80 transition-colors duration-150 font-medium min-h-[44px] min-w-[44px]"
           >
