@@ -365,7 +365,7 @@ const VanityGenerator = forwardRef<VanityGeneratorHandle>(function VanityGenerat
                   aria-label="Vanity address prefix"
                   className={`w-full px-3 py-2 bg-card border rounded-md text-foreground font-mono text-sm placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-accent disabled:opacity-50 ${hasInvalidChars ? 'border-red-800/60' : 'border-border'}`}
                 />
-                
+
                 {/* Validation indicator */}
                 {prefix && (
                   <div className="flex items-center gap-2">
@@ -378,12 +378,12 @@ const VanityGenerator = forwardRef<VanityGeneratorHandle>(function VanityGenerat
                     )}
                   </div>
                 )}
-                
+
                 {/* Static helper text */}
                 <p className="text-xs text-zinc-600 font-mono tracking-wider">
                   Ethereum addresses only contain: 0 1 2 3 4 5 6 7 8 9 a b c d e f
                 </p>
-                
+
                 <div className="flex items-center justify-between">
                   <p className="text-xs text-muted-foreground">{prefix.length}/6</p>
                   {prefix && error && <p className="text-xs text-red-500">{error}</p>}
@@ -437,7 +437,7 @@ const VanityGenerator = forwardRef<VanityGeneratorHandle>(function VanityGenerat
                   </div>
                 )}
 
-                
+
               </>
             )}
 
@@ -543,7 +543,7 @@ const VanityGenerator = forwardRef<VanityGeneratorHandle>(function VanityGenerat
         {verifyOpen && (
           <div className="p-6 space-y-4 bg-background border-t border-zinc-700">
             <p className="text-xs text-muted-foreground leading-relaxed">
-              Enter your private key below to verify it matches your public address. For maximum security: install emitkey as an app (📲 banner below) and disconnect from the internet before verifying.
+              Enter your private key below to verify it matches your public address.
             </p>
 
             <div className="bg-amber-900/20 border border-amber-700 rounded-md p-3 text-xs text-amber-500 flex items-start gap-2">
