@@ -15,18 +15,16 @@ const jetbrainsMono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://emitkey.app"),
+  metadataBase: new URL("https://emitkey.com"),
   title: "ETH Paper Wallet Generator — emitkey.com",
-  description: "Generate a secure Ethereum paper wallet 100% in your browser. No server, no tracking, no data transmission. Your private key never leaves your device.",
+  description: "Generate a secure Ethereum paper wallet 100% in your browser. Open source, auditable, no server.",
   keywords: [
     "ethereum paper wallet",
     "ETH paper wallet generator",
     "ethereum wallet offline",
     "cold storage ethereum",
     "crypto paper wallet",
-    "ethereum private key generator",
-    "offline eth wallet",
-    "secure ethereum wallet"
+    "ethereum private key generator"
   ],
   authors: [{ name: "emitkey", url: "https://emitkey.com" }],
   icons: {
@@ -38,9 +36,9 @@ export const metadata: Metadata = {
     apple: "/apple-touch-icon.png",
   },
   openGraph: {
-    title: "ETH Paper Wallet Generator — emitkey.app",
-    description: "Generate a secure Ethereum paper wallet entirely in your browser. Open source, auditable, no server.",
-    url: "https://emitkey.app",
+    title: "ETH Paper Wallet Generator — emitkey.com",
+    description: "Generate a secure Ethereum paper wallet 100% in your browser. Open source, auditable, no server.",
+    url: "https://emitkey.com",
     siteName: "emitkey",
     locale: "en_US",
     type: "website",
@@ -48,7 +46,7 @@ export const metadata: Metadata = {
   twitter: {
     card: "summary_large_image",
     title: "ETH Paper Wallet Generator — emitkey.com",
-    description: "100% client-side ETH paper wallet generator. No server, no tracking. Open source.",
+    description: "Generate a secure Ethereum paper wallet 100% in your browser. Open source, auditable, no server.",
   },
   robots: {
     index: true,
