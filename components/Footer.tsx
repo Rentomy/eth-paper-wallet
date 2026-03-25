@@ -20,7 +20,7 @@ export default function Footer() {
             <BookOpenIcon className="w-4 h-4 shrink-0" />
             <span>Guides</span>
           </a>
-          <span className="text-zinc-700 px-1">|</span>
+          <span className="text-zinc-700 px-1">·</span>
           <a
             href="https://github.com/Rentomy/eth-paper-wallet"
             target="_blank"
