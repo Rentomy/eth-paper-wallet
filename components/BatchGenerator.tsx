@@ -63,7 +63,10 @@ export default function BatchGenerator() {
   }, []);
 
   const handleGenerateBatch = () => {
-    generateBatch(quantity);
+    // Defer batch generation to allow UI to update before expensive crypto operations
+    setTimeout(() => {
+      generateBatch(quantity);
+    }, 0);
   };
 
   const handleReset = useCallback(() => {
