@@ -1,5 +1,6 @@
 import Footer from "@/components/Footer";
 import GuideCard from "@/components/GuideCard";
+import { useState } from "react";
 
 function ShieldCheckIcon({ className }: { className?: string }) {
   return (
@@ -33,18 +34,41 @@ function Section({ title, children }: { title: string; children: React.ReactNode
   );
 }
 
-function BoxBg({ type, children }: { type: "remember" | "why-works" | "extra-security" | "key-principles" | "important"; children: React.ReactNode }) {
+function BoxBg({ type, children }: { type: "remember" | "why-works" | "extra-security" | "key-principles" | "important" | "warning" | "best-practice"; children: React.ReactNode }) {
   const styles: Record<typeof type, string> = {
     remember: "bg-amber-950/30 border-l-4 border-amber-600",
     "why-works": "bg-emerald-950/30 border-l-4 border-emerald-600",
     "extra-security": "bg-zinc-800/50 border-l-4 border-zinc-600",
     "key-principles": "bg-emerald-950/30 border-l-4 border-emerald-600",
     important: "bg-amber-950/30 border-l-4 border-amber-600",
+    warning: "bg-amber-950/30 border border-amber-900/40",
+    "best-practice": "bg-emerald-950/30 border border-emerald-900/40",
   };
   
   return (
     <div className={`p-4 rounded text-xs leading-relaxed space-y-2 ${styles[type]}`}>
       {children}
+    </div>
+  );
+}
+
+function CollapsibleWarning({ title, children, defaultOpen = true }: { title: string; children: React.ReactNode; defaultOpen?: boolean }) {
+  const [isOpen, setIsOpen] = useState(defaultOpen);
+  
+  return (
+    <div className="space-y-2">
+      <button
+        onClick={() => setIsOpen(!isOpen)}
+        className="flex items-center gap-2 text-xs font-semibold text-amber-300 hover:text-amber-200 transition-colors"
+      >
+        <span>{isOpen ? "▼" : "▶"}</span>
+        <span>{title}</span>
+      </button>
+      {isOpen && (
+        <BoxBg type="warning">
+          {children}
+        </BoxBg>
+      )}
     </div>
   );
 }
@@ -110,8 +134,6 @@ export default function GuidesPage() {
                   "Click \"Generate Wallet\"",
                   "Write down your private key by hand — or print the wallet",
                   "Verify: use the Verify Wallet tool, enter your private key, confirm the address matches",
-                  "Send a small test amount (0.001 ETH), import the key into MetaMask or Trust Wallet, confirm you can access and send funds",
-                  "Store your paper wallet in a sealed envelope in a safe, lockbox, or with a notary",
                 ].map((step, i) => (
                   <li key={i} className="flex gap-3">
                     <span className="font-semibold shrink-0">{i + 1}.</span>
@@ -119,6 +141,48 @@ export default function GuidesPage() {
                   </li>
                 ))}
               </ol>
+              
+              {/* Step 6 - New collapsible section */}
+              <li className="flex gap-3 mt-2">
+                <span className="font-semibold shrink-0">6.</span>
+                <div className="flex-1 space-y-3">
+                  <span>Optional: Test your wallet — understand the trade-off first</span>
+                  
+                  <CollapsibleWarning title="⚠ Security trade-off" defaultOpen={true}>
+                    <p>Importing your private key into any wallet app — even MetaMask or Trust Wallet — means your key has been on an internet-connected device. This reduces the air-gap security of your paper wallet.</p>
+                    <p>For maximum security: skip this step and rely on the Verify Wallet tool (Step 5) instead.</p>
+                  </CollapsibleWarning>
+                  
+                  <div className="space-y-2 pl-3 border-l border-zinc-700">
+                    <p className="font-semibold text-zinc-200">If you still want to do a live test:</p>
+                    <ol className="space-y-1 text-xs text-zinc-300 list-decimal list-inside">
+                      <li>Send a small amount (e.g. 0.001 ETH) to your new address</li>
+                      <li>Import your private key into MetaMask or Trust Wallet</li>
+                      <li>Confirm you can see the balance and send funds back out</li>
+                      <li>Immediately after testing:
+                        <ul className="space-y-1 mt-1 ml-4 list-disc list-inside">
+                          <li>Remove the wallet from MetaMask: Settings → Advanced → Remove Account</li>
+                          <li>Clear your clipboard if you copied the key</li>
+                          <li>Consider this wallet "touched" — it has been on a hot device</li>
+                        </ul>
+                      </li>
+                      <li>Generate a fresh paper wallet on emitkey.com (offline) for your actual cold storage — use the tested wallet only as a practice run</li>
+                    </ol>
+                  </div>
+                  
+                  <BoxBg type="best-practice">
+                    <p className="font-semibold text-emerald-300">✅ The safest approach</p>
+                    <p>Use the Verify Wallet tool on emitkey.com (Step 5) to confirm your key is valid — without connecting to the internet or importing into any app.</p>
+                    <p>Then send a small amount and monitor the balance on etherscan.io. Only move larger amounts once you are confident everything works.</p>
+                  </BoxBg>
+                </div>
+              </li>
+              
+              {/* Step 7 */}
+              <li className="flex gap-3 mt-2">
+                <span className="font-semibold shrink-0">7.</span>
+                <span>Store your paper wallet in a sealed envelope in a safe, lockbox, or with a notary</span>
+              </li>
             </Section>
 
             <BoxBg type="remember">
@@ -127,6 +191,7 @@ export default function GuidesPage() {
                 <li>Your private key works on Ethereum forever — independent of any website or app</li>
                 <li>Anyone with your private key has full access to your funds</li>
                 <li>No private key = no recovery, ever</li>
+                <li>If you import your private key into any app for testing — generate a fresh wallet afterward for actual cold storage. A "touched" key should never be used as your final cold storage wallet.</li>
               </ul>
             </BoxBg>
           </GuideCard>
