@@ -478,6 +478,7 @@ export default function HowItWorksPage() {
               <p>Your private key works on all of them.</p>
             </div>
           </Section>
+        </div>
 
         {/* CTA Button */}
         <div className="w-full max-w-2xl mb-10 flex flex-col sm:flex-row justify-center">
