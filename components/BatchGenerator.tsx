@@ -232,7 +232,7 @@ const BatchGenerator = forwardRef<BatchGeneratorHandle>(function BatchGenerator(
         className="w-full flex items-center justify-between py-3 px-6 bg-zinc-900 hover:bg-zinc-800 transition-colors text-left font-semibold text-base text-white min-h-[52px]"
       >
         <span className="flex items-center gap-2">
-          <span>⚡</span>
+          <ZapIcon className="w-4 h-4 shrink-0" />
           <span>Batch Generator</span>
         </span>
         <span
@@ -252,7 +252,7 @@ const BatchGenerator = forwardRef<BatchGeneratorHandle>(function BatchGenerator(
 
           {/* Security Warning */}
           <div className="bg-amber-900/20 border border-amber-700 rounded-md p-3 text-xs text-amber-500 flex items-start gap-2">
-            <span className="text-base shrink-0 mt-0.5">⚠</span>
+            <TriangleAlertIcon className="w-4 h-4 shrink-0 mt-0.5" />
             <span>
               Keep your CSV or PDF file encrypted and offline. Never store private keys on cloud services (Google Drive, Dropbox, iCloud).
             </span>
@@ -376,13 +376,15 @@ const BatchGenerator = forwardRef<BatchGeneratorHandle>(function BatchGenerator(
                   onClick={exportCSV}
                   className="flex-1 py-2 px-4 rounded-lg border border-border text-sm text-foreground hover:bg-zinc-900 transition-colors font-semibold min-h-[44px] flex items-center justify-center gap-2"
                 >
-                  📥 Export CSV
+                  <DownloadIcon className="w-4 h-4 shrink-0" />
+                  Export CSV
                 </button>
                 <button
                   onClick={handlePrintPDF}
                   className="flex-1 py-2 px-4 rounded-lg border border-border text-sm text-foreground hover:bg-zinc-900 transition-colors font-semibold min-h-[44px] flex items-center justify-center gap-2"
                 >
-                  🖨 Print / Save PDF
+                  <PrintIcon className="w-4 h-4 shrink-0" />
+                  Print / Save PDF
                 </button>
               </div>
 
@@ -395,3 +397,41 @@ const BatchGenerator = forwardRef<BatchGeneratorHandle>(function BatchGenerator(
 });
 
 export default BatchGenerator;
+
+function ZapIcon({ className }: { className?: string }) {
+  return (
+    <svg className={className} fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24" aria-hidden="true">
+      <polyline points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" />
+    </svg>
+  );
+}
+
+function TriangleAlertIcon({ className }: { className?: string }) {
+  return (
+    <svg className={className} fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24" aria-hidden="true">
+      <path strokeLinecap="round" strokeLinejoin="round" d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" />
+      <line x1="12" y1="9" x2="12" y2="13" strokeLinecap="round" />
+      <line x1="12" y1="17" x2="12.01" y2="17" strokeLinecap="round" />
+    </svg>
+  );
+}
+
+function DownloadIcon({ className }: { className?: string }) {
+  return (
+    <svg className={className} fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24" aria-hidden="true">
+      <path strokeLinecap="round" strokeLinejoin="round" d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4" />
+      <polyline points="7 10 12 15 17 10" />
+      <line x1="12" y1="15" x2="12" y2="3" strokeLinecap="round" />
+    </svg>
+  );
+}
+
+function PrintIcon({ className }: { className?: string }) {
+  return (
+    <svg className={className} fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24" aria-hidden="true">
+      <polyline points="6 9 6 2 18 2 18 9" />
+      <path d="M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2" />
+      <rect x="6" y="14" width="12" height="8" />
+    </svg>
+  );
+}

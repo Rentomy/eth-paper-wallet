@@ -10,6 +10,15 @@ interface GuideCardProps {
   children: React.ReactNode;
 }
 
+function FileIcon({ className }: { className?: string }) {
+  return (
+    <svg className={className} fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24" aria-hidden="true">
+      <path strokeLinecap="round" strokeLinejoin="round" d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" />
+      <polyline points="14 2 14 8 20 8" />
+    </svg>
+  );
+}
+
 function ChevronDownIcon({ className }: { className?: string }) {
   return (
     <svg
@@ -154,9 +163,10 @@ export default function GuideCard({
           {/* Download PDF Button */}
           <button
             onClick={handlePrintGuide}
-            className="w-full mt-6 py-3 rounded-xl border border-zinc-700 text-white hover:bg-zinc-800 font-semibold text-base transition-colors min-h-[52px]"
+            className="w-full mt-6 py-3 rounded-xl border border-zinc-700 text-white hover:bg-zinc-800 font-semibold text-base transition-colors min-h-[52px] flex items-center justify-center gap-2"
           >
-            📄 Download Guide as PDF
+            <FileIcon className="w-4 h-4 shrink-0" />
+            Download Guide as PDF
           </button>
         </div>
       )}

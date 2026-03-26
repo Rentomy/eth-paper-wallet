@@ -125,7 +125,7 @@ export default function GuidesPage() {
         <div className="w-full max-w-2xl space-y-6 mb-10">
           {/* Guide 1 - Cold Storage */}
           <GuideCard
-            icon="🧊"
+            icon="01"
             badge="01"
             title="Cold Storage — Store Your Crypto Securely Forever"
             intro="The simplest and most secure form of storage. No app, no device, no company between you and your funds."
@@ -208,7 +208,7 @@ export default function GuidesPage() {
 
           {/* Guide 2 - Time-Lock */}
           <GuideCard
-            icon="⏳"
+            icon="02"
             badge="02"
             title="Time-Lock — Lock Funds Until a Future Date"
             intro="No smart contract needed. A sealed envelope and a trusted person is equally secure — and far simpler."
@@ -261,7 +261,7 @@ export default function GuidesPage() {
 
           {/* Guide 3 - Inheritance */}
           <GuideCard
-            icon="🏛"
+            icon="03"
             badge="03"
             title="Inheritance Wallet — Pass On Your Crypto Securely"
             intro="Most crypto is lost forever after the owner's death — not from hacking, but because no one knew how to access it. This guide solves that with nothing more than paper."
