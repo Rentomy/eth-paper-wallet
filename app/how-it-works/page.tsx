@@ -413,6 +413,68 @@ export default function HowItWorksPage() {
                 <li>Just the number on your paper.</li>
               </ul>
             </BoxBg>
+          {/* Section 7 - One wallet. Every EVM network. */}
+          <Section
+            title="One wallet. Every EVM network."
+            subtitle=""
+          >
+            <div className="space-y-4 text-sm text-zinc-300 leading-relaxed">
+              <p>
+                A wallet generated on emitkey.com works on every EVM-compatible network — automatically,
+                with no extra steps.
+              </p>
+              <p>Same private key. Same address. Every time.</p>
+            </div>
+
+            {/* Network Grid */}
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+              {[
+                { name: "Ethereum", ticker: "ETH", color: "text-blue-400" },
+                { name: "Polygon", ticker: "MATIC", color: "text-purple-400" },
+                { name: "BNB Chain", ticker: "BNB", color: "text-amber-400" },
+                { name: "Arbitrum", ticker: "ARB", color: "text-blue-300" },
+                { name: "Optimism", ticker: "OP", color: "text-red-400" },
+                { name: "Avalanche", ticker: "AVAX", color: "text-red-500" },
+                { name: "Base", ticker: "BASE", color: "text-blue-500" },
+                { name: "zkSync", ticker: "ZK", color: "text-emerald-400" },
+                { name: "Fantom", ticker: "FTM", color: "text-blue-400" },
+              ].map((network) => (
+                <div
+                  key={network.name}
+                  className="bg-zinc-900 border border-zinc-800 rounded-xl p-4 relative"
+                >
+                  <p className="text-sm font-semibold text-white">{network.name}</p>
+                  <p className={`text-xs font-mono ${network.color}`}>{network.ticker}</p>
+                  <div className="absolute top-2 right-2 text-xs">✅</div>
+                </div>
+              ))}
+            </div>
+
+            {/* Emerald highlight box */}
+            <BoxBg type="success">
+              <p className="font-semibold">🔑 Your private key is the same on all these networks.</p>
+              <p className="font-semibold">Your address is the same on all these networks.</p>
+              <p>Generate once on emitkey.com — use everywhere.</p>
+            </BoxBg>
+
+            {/* Amber warning box */}
+            <BoxBg type="warning">
+              <p className="font-semibold">⚠ Important: each network has its own tokens and transactions.</p>
+              <p>
+                Sending ETH to your address on Arbitrum is not the same as sending ETH on Ethereum mainnet.
+                Always verify which network you are using in your wallet app before sending funds.
+              </p>
+            </BoxBg>
+
+            {/* Explainer box */}
+            <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-4 font-mono text-xs text-zinc-400 space-y-2">
+              <p className="font-semibold text-white mb-3">Why does this work?</p>
+              <p>All EVM networks use the same cryptographic standard:</p>
+              <p className="text-emerald-400">secp256k1 + keccak256</p>
+              <p className="mt-3">Ethereum invented it.</p>
+              <p>Every EVM chain adopted it.</p>
+              <p>Your private key works on all of them.</p>
+            </div>
           </Section>
         </div>
 

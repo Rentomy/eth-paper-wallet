@@ -25,6 +25,9 @@ export default function Home() {
           <p className="text-sm text-muted-foreground leading-relaxed text-pretty break-words">
             100% local · works offline · open source
           </p>
+          <p className="mt-2 text-xs text-zinc-600 text-center tracking-wide">
+            Works on Ethereum · Polygon · BNB · Arbitrum · Optimism · Base · and all EVM networks
+          </p>
         </header>
 
         {/* Card */}
