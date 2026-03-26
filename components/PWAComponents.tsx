@@ -47,7 +47,7 @@ export function InstallPrompt() {
               📲
             </span>
             <span className="text-sm font-semibold text-foreground">
-              Install emitkey
+              Install EmitKey
             </span>
           </div>
           <p className="text-xs text-muted-foreground">
