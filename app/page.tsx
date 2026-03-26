@@ -23,7 +23,7 @@ export default function Home() {
             Paper Wallet Generator
           </h1>
           <p className="text-sm text-muted-foreground leading-relaxed text-pretty break-words">
-            Works Offline · In Your Browser
+            100% local · works offline · open source
           </p>
         </header>
 
