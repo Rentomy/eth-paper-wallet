@@ -542,14 +542,18 @@ const VanityGenerator = forwardRef<VanityGeneratorHandle>(function VanityGenerat
 
         {verifyOpen && (
           <div className="p-6 space-y-4 bg-background border-t border-zinc-700">
-            <p className="text-xs text-muted-foreground leading-relaxed">
-              Enter the private key you just generated below to verify that it matches your public address.
+            <p className="text-sm font-semibold text-emerald-400">
+              {'✅'} Always verify your wallet before storing any funds.
             </p>
 
-            <div className="bg-amber-900/20 border border-amber-700 rounded-md p-3 text-xs text-amber-500 flex items-start gap-2">
+            <p className="text-sm text-zinc-400 mt-2">
+              Enter the private key you just generated to confirm it correctly derives your public address. Everything runs in your browser — nothing is transmitted.
+            </p>
+
+            <div className="bg-amber-900/20 border border-amber-700 rounded-md p-3 text-xs text-amber-500 flex items-start gap-2 mt-4">
               <span className="text-base shrink-0 mt-0.5">⚠</span>
               <span>
-                Never enter a private key that holds significant funds into any website — including this one. This tool is intended for freshly generated wallets only.
+                Only use this tool with freshly generated wallets that hold no funds yet. Never enter a private key that already holds value into any website — including this one.
               </span>
             </div>
 
