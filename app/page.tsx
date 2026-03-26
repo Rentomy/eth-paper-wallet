@@ -17,13 +17,13 @@ export default function Home() {
         <header className="w-full max-w-2xl mb-10 text-center">
           <div className="inline-flex items-center gap-2 text-xs text-accent font-mono uppercase tracking-widest mb-4">
             <EthDiamond />
-            Ethereum Paper Wallet
+            Ethereum
           </div>
           <h1 className="text-3xl font-bold text-foreground text-balance leading-tight mb-3">
             Paper Wallet Generator
           </h1>
           <p className="text-sm text-muted-foreground leading-relaxed text-pretty break-words">
-            Offline · Open source · Secure
+            100% local · works offline · open source
           </p>
         </header>
 

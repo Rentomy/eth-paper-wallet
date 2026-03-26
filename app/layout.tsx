@@ -26,7 +26,7 @@ export const metadata: Metadata = {
     "crypto paper wallet",
     "ethereum private key generator"
   ],
-  authors: [{ name: "emitkey", url: "https://emitkey.com" }],
+  authors: [{ name: "EmitKey", url: "https://emitkey.com" }],
   icons: {
     icon: [
       { url: "/favicon.ico", sizes: "any" },
@@ -39,7 +39,7 @@ export const metadata: Metadata = {
     title: "ETH Paper Wallet Generator — emitkey.com",
     description: "Generate a secure Ethereum paper wallet 100% in your browser. Open source, auditable, no server.",
     url: "https://emitkey.com",
-    siteName: "emitkey",
+    siteName: "EmitKey",
     locale: "en_US",
     type: "website",
   },
