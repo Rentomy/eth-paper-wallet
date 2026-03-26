@@ -447,21 +447,21 @@ export default function HowItWorksPage() {
                 >
                   <p className="text-sm font-semibold text-white">{network.name}</p>
                   <p className={`text-xs font-mono ${network.color}`}>{network.ticker}</p>
-                  <div className="absolute top-2 right-2 text-xs">✅</div>
+                  <div className="absolute top-2 right-2 text-xs">{'✅'}</div>
                 </div>
               ))}
             </div>
 
             {/* Emerald highlight box */}
             <BoxBg type="success">
-              <p className="font-semibold">🔑 Your private key is the same on all these networks.</p>
+              <p className="font-semibold">Your private key is the same on all these networks.</p>
               <p className="font-semibold">Your address is the same on all these networks.</p>
               <p>Generate once on emitkey.com — use everywhere.</p>
             </BoxBg>
 
             {/* Amber warning box */}
             <BoxBg type="warning">
-              <p className="font-semibold">⚠ Important: each network has its own tokens and transactions.</p>
+              <p className="font-semibold">Important: each network has its own tokens and transactions.</p>
               <p>
                 Sending ETH to your address on Arbitrum is not the same as sending ETH on Ethereum mainnet.
                 Always verify which network you are using in your wallet app before sending funds.
