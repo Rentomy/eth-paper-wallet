@@ -229,11 +229,15 @@ const VanityGenerator = forwardRef<VanityGeneratorHandle>(function VanityGenerat
     const printWindow = window.open("", "_blank");
     if (!printWindow) return;
 
+    // Determine if this is a vanity wallet or a regular generated wallet
+    const isVanity = wallet === vanityWallet;
+    const title = isVanity ? "Vanity Wallet" : "Ethereum Paper Wallet";
+
     printWindow.document.write(`
       <!DOCTYPE html>
       <html>
         <head>
-          <title>Vanity Wallet</title>
+          <title>${title}</title>
           <style>
             body { font-family: monospace; background: #fff; color: #000; padding: 40px; }
             .wallet-print { max-width: 600px; margin: 0 auto; border: 2px solid #000; padding: 32px; border-radius: 8px; }
@@ -250,7 +254,7 @@ const VanityGenerator = forwardRef<VanityGeneratorHandle>(function VanityGenerat
         </head>
         <body>
           <div class="wallet-print">
-            <h2>Vanity Wallet</h2>
+            <h2>${title}</h2>
             <p class="warning">Keep this document secure. Never share or digitally store your private key.</p>
             <div class="section">
               <div class="label">Public Address</div>
