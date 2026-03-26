@@ -340,7 +340,7 @@ const VanityGenerator = forwardRef<VanityGeneratorHandle>(function VanityGenerat
           className="w-full flex items-center justify-between py-3 px-6 bg-zinc-900 hover:bg-zinc-800 transition-colors text-left font-semibold text-base text-white min-h-[52px]"
         >
           <span className="flex items-center gap-2">
-            <span>✦</span>
+            <DiamondIcon className="w-4 h-4 shrink-0" />
             <span>Vanity Address (optional)</span>
           </span>
           <span
@@ -397,15 +397,15 @@ const VanityGenerator = forwardRef<VanityGeneratorHandle>(function VanityGenerat
                 {prefix && (
                   <>
                     <div className="bg-amber-900/20 border border-amber-700 rounded-md p-3 text-xs text-amber-500 flex items-start gap-2">
-                      <span className="text-base shrink-0 mt-0.5">⚡</span>
+                      <ZapIcon className="w-4 h-4 shrink-0 mt-0.5" />
                       <span>
-                        Your device's CPU will work hard during the search. Battery and performance may be affected.
+                        Your device&apos;s CPU will work hard during the search. Battery and performance may be affected.
                       </span>
                     </div>
 
                     {prefix.length > 4 && (
                       <div className="sm:hidden bg-amber-900/20 border border-amber-700 rounded-md p-3 text-xs text-amber-500 flex items-start gap-2">
-                        <span className="text-base shrink-0 mt-0.5">⚠</span>
+                        <TriangleAlertIcon className="w-4 h-4 shrink-0 mt-0.5" />
                         <span>
                           We recommend using a desktop for prefixes longer than 4 characters.
                         </span>
@@ -534,7 +534,7 @@ const VanityGenerator = forwardRef<VanityGeneratorHandle>(function VanityGenerat
           className="w-full flex items-center justify-between py-3 px-6 bg-zinc-900 hover:bg-zinc-800 transition-colors text-left font-semibold text-base text-white min-h-[52px]"
         >
           <span className="flex items-center gap-2">
-            <span>🔍</span>
+            <SearchIcon className="w-4 h-4 shrink-0" />
             <span>Verify Wallet</span>
           </span>
           <span
@@ -552,7 +552,7 @@ const VanityGenerator = forwardRef<VanityGeneratorHandle>(function VanityGenerat
             </div>
 
             <div className="bg-amber-900/20 border border-amber-700 rounded-md p-3 text-xs text-amber-500 flex items-start gap-2">
-              <span className="text-base shrink-0 mt-0.5">⚠</span>
+              <TriangleAlertIcon className="w-4 h-4 shrink-0 mt-0.5" />
               <span>
                 Only use this tool with freshly generated wallets that hold no funds yet. Never enter a private key that already holds value into any website — including this one.
               </span>
@@ -577,7 +577,7 @@ const VanityGenerator = forwardRef<VanityGeneratorHandle>(function VanityGenerat
                   className="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
                   aria-label={showVerifyKey ? "Hide key" : "Show key"}
                 >
-                  {showVerifyKey ? "👁" : "👁‍🗨"}
+                  {showVerifyKey ? <EyeOffIcon /> : <EyeIcon />}
                 </button>
               </div>
             </div>
@@ -601,7 +601,7 @@ const VanityGenerator = forwardRef<VanityGeneratorHandle>(function VanityGenerat
             {verifiedAddress && (
               <div className="bg-emerald-950/30 border border-emerald-900/40 rounded-lg p-4 space-y-2">
                 <div className="flex items-center gap-2 text-emerald-400 font-semibold text-sm">
-                  <span>✅</span>
+                  <CheckCircleIcon className="w-4 h-4 shrink-0" />
                   <span>Match confirmed</span>
                 </div>
                 <p className="text-xs text-emerald-300/70">Your private key correctly corresponds to this address:</p>
@@ -615,7 +615,7 @@ const VanityGenerator = forwardRef<VanityGeneratorHandle>(function VanityGenerat
             {verifyError && (
               <div className="bg-red-950/30 border border-red-900/40 rounded-lg p-4 space-y-2">
                 <div className="flex items-center gap-2 text-red-400 font-semibold text-sm">
-                  <span>❌</span>
+                  <XCircleIcon className="w-4 h-4 shrink-0" />
                   <span>Invalid private key</span>
                 </div>
                 <p className="text-xs text-red-300/70">{verifyError}</p>
@@ -821,6 +821,59 @@ function WarningIcon() {
   return (
     <svg className="w-3 h-3 shrink-0" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24" aria-hidden="true">
       <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" />
+    </svg>
+  );
+}
+
+function DiamondIcon({ className }: { className?: string }) {
+  return (
+    <svg className={className} fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24" aria-hidden="true">
+      <polygon points="12 2 22 12 12 22 2 12" />
+    </svg>
+  );
+}
+
+function ZapIcon({ className }: { className?: string }) {
+  return (
+    <svg className={className} fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24" aria-hidden="true">
+      <polyline points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" />
+    </svg>
+  );
+}
+
+function TriangleAlertIcon({ className }: { className?: string }) {
+  return (
+    <svg className={className} fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24" aria-hidden="true">
+      <path strokeLinecap="round" strokeLinejoin="round" d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" />
+      <line x1="12" y1="9" x2="12" y2="13" strokeLinecap="round" />
+      <line x1="12" y1="17" x2="12.01" y2="17" strokeLinecap="round" />
+    </svg>
+  );
+}
+
+function SearchIcon({ className }: { className?: string }) {
+  return (
+    <svg className={className} fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24" aria-hidden="true">
+      <circle cx="11" cy="11" r="8" />
+      <line x1="21" y1="21" x2="16.65" y2="16.65" strokeLinecap="round" />
+    </svg>
+  );
+}
+
+function CheckCircleIcon({ className }: { className?: string }) {
+  return (
+    <svg className={className} fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24" aria-hidden="true">
+      <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+    </svg>
+  );
+}
+
+function XCircleIcon({ className }: { className?: string }) {
+  return (
+    <svg className={className} fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24" aria-hidden="true">
+      <circle cx="12" cy="12" r="10" />
+      <line x1="15" y1="9" x2="9" y2="15" strokeLinecap="round" />
+      <line x1="9" y1="9" x2="15" y2="15" strokeLinecap="round" />
     </svg>
   );
 }

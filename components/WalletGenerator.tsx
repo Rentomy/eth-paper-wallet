@@ -124,13 +124,13 @@ export default function WalletGenerator() {
       <div className="flex flex-col gap-6">
         <div className="bg-zinc-900 border border-zinc-700 rounded-xl p-6">
           <h2 className="text-lg font-semibold text-foreground mb-4 flex items-center gap-2">
-            <span>🔒</span> For maximum security — follow these 3 steps:
+            <LockIcon className="w-4 h-4 text-accent shrink-0" /> For maximum security — follow these 3 steps:
           </h2>
           
           <div className="flex flex-col gap-4 mb-6">
             {/* Step 1 - Done */}
             <div className="flex items-start gap-3 text-emerald-500">
-              <span className="text-lg">✅</span>
+              <CheckCircleIcon className="w-5 h-5 shrink-0 mt-0.5" />
               <div>
                 <p className="font-medium">Page loaded — you are here</p>
               </div>
@@ -138,7 +138,10 @@ export default function WalletGenerator() {
             
             {/* Step 2 - Action needed or completed */}
             <div className={`flex items-start gap-3 ${isOnline ? "text-amber-500" : "text-emerald-500"}`}>
-              <span className={`text-lg ${isOnline ? "animate-pulse" : ""}`}>{isOnline ? "📵" : "✅"}</span>
+              {isOnline
+                ? <WifiOffIcon className={`w-5 h-5 shrink-0 mt-0.5 ${isOnline ? "animate-pulse" : ""}`} />
+                : <CheckCircleIcon className="w-5 h-5 shrink-0 mt-0.5" />
+              }
               <div>
                 <p className="font-medium">Disconnect from the internet (airplane mode or WiFi off)</p>
               </div>
@@ -146,7 +149,10 @@ export default function WalletGenerator() {
             
             {/* Step 3 - Upcoming */}
             <div className={`flex items-start gap-3 ${isOnline ? "text-zinc-500" : "text-emerald-500"}`}>
-              <span className="text-lg">{isOnline ? "🔑" : "✅"}</span>
+              {isOnline
+                ? <KeyIcon className="w-5 h-5 shrink-0 mt-0.5" />
+                : <CheckCircleIcon className="w-5 h-5 shrink-0 mt-0.5" />
+              }
               <div>
                 <p className="font-medium">Generate your wallet</p>
               </div>
@@ -383,6 +389,42 @@ function WarningIcon() {
   return (
     <svg className="w-3 h-3 shrink-0" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24" aria-hidden="true">
       <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" />
+    </svg>
+  );
+}
+
+function LockIcon({ className }: { className?: string }) {
+  return (
+    <svg className={className} fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24" aria-hidden="true">
+      <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+      <path strokeLinecap="round" strokeLinejoin="round" d="M7 11V7a5 5 0 0110 0v4" />
+    </svg>
+  );
+}
+
+function CheckCircleIcon({ className }: { className?: string }) {
+  return (
+    <svg className={className} fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24" aria-hidden="true">
+      <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+    </svg>
+  );
+}
+
+function WifiOffIcon({ className }: { className?: string }) {
+  return (
+    <svg className={className} fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24" aria-hidden="true">
+      <line x1="1" y1="1" x2="23" y2="23" strokeLinecap="round" />
+      <path strokeLinecap="round" strokeLinejoin="round" d="M16.72 11.06A10.94 10.94 0 0119 12.55M5 12.55a10.94 10.94 0 015.17-2.39M10.71 5.05A16 16 0 0122.56 9M1.42 9a15.91 15.91 0 014.7-2.88M8.56 2.75c1.1-.35 2.27-.54 3.44-.54" />
+      <path strokeLinecap="round" strokeLinejoin="round" d="M12 20h.01" />
+    </svg>
+  );
+}
+
+function KeyIcon({ className }: { className?: string }) {
+  return (
+    <svg className={className} fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24" aria-hidden="true">
+      <circle cx="8" cy="15" r="4" />
+      <path strokeLinecap="round" strokeLinejoin="round" d="M11.828 11.172l8.172-8.172M17 7l2 2" />
     </svg>
   );
 }

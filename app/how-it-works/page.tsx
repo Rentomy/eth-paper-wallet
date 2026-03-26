@@ -3,6 +3,33 @@
 import Footer from "@/components/Footer";
 import { useState } from "react";
 
+function CheckCircleIcon({ className }: { className?: string }) {
+  return (
+    <svg className={className} fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24" aria-hidden="true">
+      <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+    </svg>
+  );
+}
+
+function XCircleIcon({ className }: { className?: string }) {
+  return (
+    <svg className={className} fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24" aria-hidden="true">
+      <circle cx="12" cy="12" r="10" />
+      <line x1="15" y1="9" x2="9" y2="15" strokeLinecap="round" />
+      <line x1="9" y1="9" x2="15" y2="15" strokeLinecap="round" />
+    </svg>
+  );
+}
+
+function LockIcon({ className }: { className?: string }) {
+  return (
+    <svg className={className} fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24" aria-hidden="true">
+      <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+      <path strokeLinecap="round" strokeLinejoin="round" d="M7 11V7a5 5 0 0110 0v4" />
+    </svg>
+  );
+}
+
 function ArrowLeftIcon({ className }: { className?: string }) {
   return (
     <svg
@@ -94,7 +121,11 @@ function ComparisonCard({
       </p>
       <ul className="space-y-2 text-xs">
         {items.map((item, i) => (
-          <li key={i} className={highlight === "left" ? "text-emerald-400" : "text-red-400"}>
+          <li key={i} className={`flex items-start gap-2 ${highlight === "left" ? "text-emerald-400" : "text-red-400"}`}>
+            {highlight === "left"
+              ? <CheckCircleIcon className="w-3.5 h-3.5 shrink-0 mt-0.5" />
+              : <XCircleIcon className="w-3.5 h-3.5 shrink-0 mt-0.5" />
+            }
             {item}
           </li>
         ))}
@@ -239,18 +270,18 @@ export default function HowItWorksPage() {
               <ComparisonCard
                 title="Private Key → Address"
                 items={[
-                  "✅ Milliseconds",
-                  "✅ Any device",
-                  "✅ Done by emitkey.com in your browser",
+                  "Milliseconds",
+                  "Any device",
+                  "Done by emitkey.com in your browser",
                 ]}
                 highlight="left"
               />
               <ComparisonCard
                 title="Address → Private Key"
                 items={[
-                  "❌ Longer than the age of the universe",
-                  "❌ All computers on Earth combined cannot do this",
-                  "❌ Mathematically impossible (2²⁵⁶ possibilities)",
+                  "Longer than the age of the universe",
+                  "All computers on Earth combined cannot do this",
+                  "Mathematically impossible (2²⁵⁶ possibilities)",
                 ]}
                 highlight="right"
               />
@@ -327,7 +358,7 @@ export default function HowItWorksPage() {
             </div>
 
             <BoxBg type="success">
-              <p className="font-semibold mb-2">✅ Honest Conclusion</p>
+              <p className="font-semibold mb-2 flex items-center gap-2"><CheckCircleIcon className="w-4 h-4 shrink-0" /> Honest Conclusion</p>
               <p className="mb-2">
                 No existing or near-future quantum computer is anywhere close to threatening Ethereum
                 private keys.
@@ -350,8 +381,8 @@ export default function HowItWorksPage() {
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-4">
-                <p className="text-xs font-semibold text-zinc-400 mb-3 uppercase tracking-wide">
-                  ❌ NOT a real risk
+                <p className="text-xs font-semibold text-zinc-400 mb-3 uppercase tracking-wide flex items-center gap-2">
+                  <XCircleIcon className="w-3.5 h-3.5 shrink-0" /> NOT a real risk
                 </p>
                 <ul className="space-y-2 text-xs text-zinc-300">
                   <li>Cracking the algorithm</li>
@@ -361,8 +392,8 @@ export default function HowItWorksPage() {
               </div>
 
               <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-4">
-                <p className="text-xs font-semibold text-emerald-400 mb-3 uppercase tracking-wide">
-                  ✅ REAL risks
+                <p className="text-xs font-semibold text-emerald-400 mb-3 uppercase tracking-wide flex items-center gap-2">
+                  <CheckCircleIcon className="w-3.5 h-3.5 shrink-0" /> REAL risks
                 </p>
                 <ul className="space-y-2 text-xs text-zinc-300">
                   <li>Photo of your private key</li>
@@ -407,7 +438,7 @@ export default function HowItWorksPage() {
             </div>
 
             <BoxBg type="success">
-              <p className="font-semibold mb-2">🔒 The private key is the wallet.</p>
+              <p className="font-semibold mb-2 flex items-center gap-2"><LockIcon className="w-4 h-4 shrink-0" /> The private key is the wallet.</p>
               <ul className="space-y-1 text-xs">
                 <li>Not the website. Not the app. Not the company.</li>
                 <li>Just the number on your paper.</li>
@@ -447,7 +478,7 @@ export default function HowItWorksPage() {
                 >
                   <p className="text-sm font-semibold text-white">{network.name}</p>
                   <p className={`text-xs font-mono ${network.color}`}>{network.ticker}</p>
-                  <div className="absolute top-2 right-2 text-xs">{'✅'}</div>
+                  <CheckCircleIcon className="absolute top-2 right-2 w-3.5 h-3.5 text-emerald-400" />
                 </div>
               ))}
             </div>
