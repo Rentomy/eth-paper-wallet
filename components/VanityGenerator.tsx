@@ -355,6 +355,11 @@ const VanityGenerator = forwardRef<VanityGeneratorHandle>(function VanityGenerat
           <div className="p-6 space-y-4 bg-background border-t border-zinc-700">
             {!vanityWallet && (
               <>
+                {/* Intro text */}
+                <div className="text-xs text-muted-foreground leading-relaxed">
+                  Generate a vanity address with a custom prefix — choose any combination of hex characters (0–9, a–f) up to 6 characters long. Your address will start with <span className="font-mono">0x</span> followed by your chosen prefix. The longer the prefix, the more attempts required.
+                </div>
+
                 <input
                   type="text"
                   value={prefix}
@@ -542,15 +547,11 @@ const VanityGenerator = forwardRef<VanityGeneratorHandle>(function VanityGenerat
 
         {verifyOpen && (
           <div className="p-6 space-y-4 bg-background border-t border-zinc-700">
-            <p className="text-sm font-semibold text-emerald-400">
-              {'✅'} Always verify your wallet before storing any funds.
-            </p>
-
-            <p className="text-sm text-zinc-400 mt-2">
+            <div className="text-xs text-muted-foreground leading-relaxed">
               Enter the private key you just generated to confirm it correctly derives your public address. Everything runs in your browser — nothing is transmitted.
-            </p>
+            </div>
 
-            <div className="bg-amber-900/20 border border-amber-700 rounded-md p-3 text-xs text-amber-500 flex items-start gap-2 mt-4">
+            <div className="bg-amber-900/20 border border-amber-700 rounded-md p-3 text-xs text-amber-500 flex items-start gap-2">
               <span className="text-base shrink-0 mt-0.5">⚠</span>
               <span>
                 Only use this tool with freshly generated wallets that hold no funds yet. Never enter a private key that already holds value into any website — including this one.
@@ -621,12 +622,6 @@ const VanityGenerator = forwardRef<VanityGeneratorHandle>(function VanityGenerat
               </div>
             )}
 
-            <div className="pt-2 border-t border-border">
-              <div className="text-xs text-muted-foreground flex items-start gap-2">
-                <span className="shrink-0 mt-0.5">✅</span>
-                <span>Always verify your wallet before storing funds</span>
-              </div>
-            </div>
           </div>
         )}
       </div>
