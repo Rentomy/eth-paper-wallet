@@ -413,6 +413,8 @@ export default function HowItWorksPage() {
                 <li>Just the number on your paper.</li>
               </ul>
             </BoxBg>
+          </Section>
+
           {/* Section 7 - One wallet. Every EVM network. */}
           <Section
             title="One wallet. Every EVM network."
@@ -476,7 +478,6 @@ export default function HowItWorksPage() {
               <p>Your private key works on all of them.</p>
             </div>
           </Section>
-        </div>
 
         {/* CTA Button */}
         <div className="w-full max-w-2xl mb-10 flex flex-col sm:flex-row justify-center">
